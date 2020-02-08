@@ -1,7 +1,11 @@
 #include <Servo.h>
-#include <time.h>
 #include "pinmap.h"
-Servo myServo; 
+Servo myServo;
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+const unsigned long period = 100;  //the value is a number of milliseconds
+int lastSecond = -1;
+int seconds;
 const int KILL = 3; // Killswitch input
 int incomingByte = 0;
 int buttonState = 0; 
@@ -9,7 +13,6 @@ int trackState;
 int depthPin = A0;
 int voltPin = A1;
 boolean hasRun = false;
-clock_t time1 = clock();
 double timeUsed;
 int depthVal;
 int voltageVal;
@@ -38,7 +41,7 @@ void setup() {
     myServo.writeMicroseconds(1500);
     pinMode(ThrustDir, OUTPUT);
     pinMode(depthPin, INPUT);
-    pinMode(KILL, INPUT);  
+    pinMode(KILL, INPUT); 
    /*iterates through each thrust pin and sets its pin mode 
     *(there are 8 so this is more efficient than writing it all out)
     */
@@ -46,19 +49,16 @@ void setup() {
        pinMode(pwmPins[i], OUTPUT);
        pinMode(dirPins[i], OUTPUT);
     }
-    double timeUsed = (time1 - time2)
-    if (timeUsed == 60) {
-        depthVal = analogRead(depthPin);
-    }
-    end = clock();
+   
  /* digitalWrite(DIR0, HIGH); //delay(1500); analogWrite(PWM0, current0);*/ 
 };
 /* checks if current state has been written to serial */
 void Track(){
       if (trackCount == false){
          trackingState();
-        }
-  }
+      }
+}
+
 /* tracks and wrties state to serial */ 
 void trackingState(){
     switch (trackState){
@@ -78,6 +78,7 @@ void trackingState(){
       hasRun = true;
       break;
       case 6: Serial.println("reading depthVal");
+      //Serial.write(depthVal);
       hasRun = true;
       break;
       case 7: Serial.println("reading voltVal");
@@ -105,7 +106,13 @@ void loop() {
        //Serial.print("I received: ");
        // Serial.println(incomingByte, DEC);
     }
-
+    currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+    if (currentMillis - startMillis >= period){  //test whether the period has elapsed
+        depthVal = analogRead(depthPin);
+        Serial.println(depthVal);
+        startMillis = currentMillis;
+    }
+    
     killed = digitalRead(killPin); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
     if (killed) {
       resetAll();
@@ -115,74 +122,78 @@ void loop() {
       currentState = States:: WaitForFF;
       thrustersOn = 0;
     }*/
-switch(currentState){
-    case States::WaitFor7E:
-        currentState = States:: WaitForFF;
+        switch(currentState){
+        case States::WaitFor7E:
             if(hasRun == false){
                 trackState = 1;
                 Track();
             }
-        hasRun = false;
-        break;
-    case States::WaitForFF:
-        if(hasRun == false){
-            trackState = 2;
-            Track();
-        }
-        switch(incomingByte){
-            case 'A'/*0x10*/ : currentState = States:: Read; hasRun = false;
+            if(incomingByte == 'X'){
+                currentState = States:: WaitForFF;
+                hasRun = false;
+            }
+           
             break;
-            case 'B' /*0x11*/: currentState = States:: Write; hasRun = false;
-            break;
-        }
-        break;
-    case States:: Read:
-        if(hasRun == false){
-            trackState = 3;
-            Track();
-        }
-        if(incomingByte == 'C'){ 
-            hasRun = false; 
-            currentState = States:: Address;
-        }
-        break;
-    case States:: Address: 
-        if(hasRun == false){
-            trackState = 5;
-            Track();
-        } 
-        if(incomingByte == 'T'/*0x20*/){
-            depthVal = analogRead(depthPin);
-            hasRun = false;
+        case States::WaitForFF:
             if(hasRun == false){
-                trackState = 6;
+                trackState = 2;
+                Track();
+            }
+            switch(incomingByte){
+                case 'A'/*0x10*/ : currentState = States:: Read; hasRun = false;
+                break;
+                case 'B' /*0x11*/: currentState = States:: Write; hasRun = false;
+                break;
+            }
+            break;
+        case States:: Read:
+            if(hasRun == false){
+                trackState = 3;
+                Track();
+            }
+            if(incomingByte == 'C'){ 
+                hasRun = false; 
+                currentState = States:: Address;
+            }
+            break;
+        case States:: Address: 
+            if(hasRun == false){
+                trackState = 5;
                 Track();
             } 
-            currentState = States:: WaitFor7E;
-        } //does voltage have a specific bit?
-        else if (incomingByte == 'Y'/*0x21*/){
-            voltageVal = analogRead(voltPin);
-            hasRun = false;
+            if(incomingByte == 'T'/*0x20*/){
+                depthVal = analogRead(depthPin);
+                Serial.print(depthVal);
+                hasRun = false;
+                if(hasRun == false){
+                    trackState = 6;
+                    Track();
+                } 
+                currentState = States:: WaitFor7E;
+            } //does voltage have a specific bit?
+            else if (incomingByte == 'Y'/*0x21*/){
+                voltageVal = analogRead(voltPin);
+                hasRun = false;
+                if(hasRun == false){
+                     trackState = 7;
+                     Track();
+                }
+                currentState = States:: WaitFor7E;
+             }
+             else if (incomingByte == 'U'/*0x22*/){
+                 batteryVal = analogRead(batteryPin);
+             }
+             else if (incomingByte == 'I'/*0x30*/){
+                 digitalRead(killPin);
+             }
+            break;
+        case States:: Write:
             if(hasRun == false){
-                 trackState = 7;
-                 Track();
+                trackState = 4;
+                Track();
             }
             currentState = States:: WaitFor7E;
-         }
-         else if (incomingByte == 'U'/*0x22*/){
-             batteryVal = analogRead(batteryPin);
-         }
-         else if (incomingByte == 'I'/*0x30*/){
-             digitalRead(killPin);
-         }
-        break;
-    case States:: Write:
-        if(hasRun == false){
-            trackState = 4;
-            Track();
-        }
-        currentState = States:: WaitFor7E;
-        break;
+            break;
        
        /* switch(incomingByte){
           case 0x80 : resetAll();
