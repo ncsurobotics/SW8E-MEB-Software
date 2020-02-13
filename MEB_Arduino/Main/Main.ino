@@ -1,9 +1,9 @@
 #include <Servo.h>
 #include "pinmap.h"
 Servo myServo;
-unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long start;  //some global variables available anywhere in the program
 unsigned long currentMillis;
-const unsigned long period = 100;  //the value is a number of milliseconds
+const unsigned long period = 1000;  //the value is a number of milliseconds
 int lastSecond = -1;
 int seconds;
 const int KILL = 3; // Killswitch input
@@ -77,7 +77,7 @@ void trackingState(){
       case 5: Serial.println("current state: Address");
       hasRun = true;
       break;
-      case 6: Serial.println("reading depthVal");
+      case 6: Serial.println(" (depthVal)");
       //Serial.write(depthVal);
       hasRun = true;
       break;
@@ -107,10 +107,10 @@ void loop() {
        // Serial.println(incomingByte, DEC);
     }
     currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
-    if (currentMillis - startMillis >= period){  //test whether the period has elapsed
+    if (currentMillis - start >= period){  //test whether the period has elapsed
         depthVal = analogRead(depthPin);
         Serial.println(depthVal);
-        startMillis = currentMillis;
+        start = currentMillis;
     }
     
     killed = digitalRead(killPin); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
