@@ -6,7 +6,6 @@ unsigned long currentMillis;
 const unsigned long period = 1000;  //the value is a number of milliseconds
 int lastSecond = -1;
 int seconds;
-const int KILL = 3; // Killswitch input
 int incomingByte = 0;
 int buttonState = 0; 
 int trackState;
@@ -15,6 +14,7 @@ int voltPin = A1;
 boolean hasRun = false;
 double timeUsed;
 int depthVal;
+int killVal;
 int voltageVal;
 int batteryVal;
 int batteryPin = A1;
@@ -26,7 +26,7 @@ int servoDir;
 int thrustersOn = 0;
 int pwmPins[ThrustPins] = {3,5,6,11};
 int dirPins[ThrustPins] = {2,4,7,8};
-boolean killed = false;
+boolean killed = true;
 boolean trackCount = false;
 
 enum class States {
@@ -41,7 +41,7 @@ void setup() {
     myServo.writeMicroseconds(1500);
     pinMode(ThrustDir, OUTPUT);
     pinMode(depthPin, INPUT);
-    pinMode(KILL, INPUT); 
+    pinMode(killPin, INPUT); 
    /*iterates through each thrust pin and sets its pin mode 
     *(there are 8 so this is more efficient than writing it all out)
     */
@@ -106,17 +106,19 @@ void loop() {
        //Serial.print("I received: ");
        // Serial.println(incomingByte, DEC);
     }
+    killed = digitalRead(killPin); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
+    /*if (killed) {
+      resetAll();
+    }*/
     currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
     if (currentMillis - start >= period){  //test whether the period has elapsed
         depthVal = analogRead(depthPin);
-        Serial.println(depthVal);
+        //9000 is arbitrary integer used as identifier for the serial output
+        //it might need to be changed depending on what real depth values the sub achieves
+        Serial.println(9000 + depthVal + .1 * killed);
         start = currentMillis;
     }
     
-    killed = digitalRead(killPin); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
-    if (killed) {
-      resetAll();
-    }
     /*if (incomingByte == 'C'0x7E){
       Serial.print("c is received");
       currentState = States:: WaitForFF;
@@ -173,6 +175,7 @@ void loop() {
             } //does voltage have a specific bit?
             else if (incomingByte == 'Y'/*0x21*/){
                 voltageVal = analogRead(voltPin);
+                killed = true;
                 hasRun = false;
                 if(hasRun == false){
                      trackState = 7;

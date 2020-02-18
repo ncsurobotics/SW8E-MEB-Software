@@ -16,9 +16,36 @@ print(ser.readline())
 ser.write('T')
 print(ser.readline())
 #read depthVal
-print(ser.readline())
 #WaitFor7E
-while 2 > 1:
-  print(ser.readline())
- # time.sleep(2.4)
+#if ser.readline()[0] == "9":
+ # stringD = ser.readline()
+  #depth = stringD#[1:3]
+  #print(depth)
+  #print("working")
+#if ser.readline()[0] == 3:
+#  stringK = ser.readline()
+ # kill = stringK[1]
+  #print(kill)
+while ser.readline()[0] == "9":
+  depthString = ser.readline()[1:4]
+  killString = ser.readline()[5]
+  print("depth: " + depthString)
+  if killString == "0":
+    killStatus = "operating"
+  else: killStatus = "killed"
+  print("kill status: " + killStatus)
+  
+
+ # make output in arduino start with D: dephtval() and kiill be K: killval()
+
+  
+ # depth = ser.readline()
+  
+#if ser.readline().isdigit() == false:
+ # kill = ser.readline()
+#while 2 > 1 :
+ # print("Depth: %4s | Kill swith: %4s" % (depth, kill))
+ # time.sleep(1);
+  #print("Depth: "+ser.readline()+"Kill switch: " + ser.readline())
+
 
