@@ -26,14 +26,15 @@ print(ser.readline())
 #  stringK = ser.readline()
  # kill = stringK[1]
   #print(kill)
-while ser.readline()[0] == "9":
-  depthString = ser.readline()[1:4]
-  killString = ser.readline()[5]
-  print("depth: " + depthString)
-  if killString == "0":
-    killStatus = "operating"
-  else: killStatus = "killed"
-  print("kill status: " + killStatus)
+while True:
+  while ser.readline()[0] == "9":
+    depthString = ser.readline()[2:6]
+    killString = ser.readline()[6]
+    print("depth: " + depthString)
+    if killString == "0":
+      killStatus = "operating"
+    else: killStatus = "killed"
+    print("kill status: " + killStatus)
   
 
  # make output in arduino start with D: dephtval() and kiill be K: killval()

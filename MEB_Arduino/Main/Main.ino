@@ -3,7 +3,7 @@
 Servo myServo;
 unsigned long start;  //some global variables available anywhere in the program
 unsigned long currentMillis;
-const unsigned long period = 1000;  //the value is a number of milliseconds
+const unsigned long period = 100;  //the value is a number of milliseconds
 int lastSecond = -1;
 int seconds;
 int incomingByte = 0;
@@ -11,9 +11,12 @@ int buttonState = 0;
 int trackState;
 int depthPin = A0;
 int voltPin = A1;
+int depthAve = 0;
 boolean hasRun = false;
 double timeUsed;
-int depthVal;
+double depthVal;
+double depthSum;
+int count = 0;
 int killVal;
 int voltageVal;
 int batteryVal;
@@ -96,6 +99,12 @@ void WaitForFF(){
     //Serial.print("waiting for FF");
     //myservo.writeMicroseconds(1600);
 };
+//depth values 0-1023
+void takingAverage() {
+     depthSum += analogRead(depthPin);
+     count++;
+     //Serial.println(depthSum);
+}
 
 void loop() {
     // send data only when you receive data:
@@ -110,12 +119,14 @@ void loop() {
     /*if (killed) {
       resetAll();
     }*/
+    takingAverage();
+    depthAve = abs(depthSum/count);
+   // Serial.println(depthAve);
     currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
     if (currentMillis - start >= period){  //test whether the period has elapsed
-        depthVal = analogRead(depthPin);
         //9000 is arbitrary integer used as identifier for the serial output
         //it might need to be changed depending on what real depth values the sub achieves
-        Serial.println(9000 + depthVal + .1 * killed);
+        Serial.println(900000 + depthAve + .1 * killed);
         start = currentMillis;
     }
     
