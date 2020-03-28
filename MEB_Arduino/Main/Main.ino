@@ -1,7 +1,7 @@
 #include <Servo.h>
 #include "pinmap.h"
 Servo myServo;
-unsigned long start;  //some global variables available anywhere in the program
+unsigned long start;  
 unsigned long currentMillis;
 const unsigned long period = 100;  //the value is a number of milliseconds
 int lastSecond = -1;
@@ -32,11 +32,18 @@ int dirPins[ThrustPins] = {2,4,7,8};
 boolean killed = true;
 boolean trackCount = false;
 
-enum class States {
-    WaitFor7E, WaitForFF,Read, Write, Address
-};
+/*enum class States {
+    WAIT_FOR_7E, WAIT_FOR_FF,READ, WRITE, Address
+};*/
+enum States {
+    WAIT_FOR_7E,
+    WAIT_FOR_FF,
+    READ,
+    WRITE,
+    ADDRESS
+  };
 
-States currentState = States::WaitFor7E;
+States currentState = WAIT_FOR_7E;
 
 void setup() {
     Serial.begin(9600);
@@ -53,7 +60,7 @@ void setup() {
        pinMode(dirPins[i], OUTPUT);
     }
    
- /* digitalWrite(DIR0, HIGH); //delay(1500); analogWrite(PWM0, current0);*/ 
+ /* digitalWRITE(DIR0, HIGH); //delay(1500); analogWRITE(PWM0, current0);*/ 
 };
 /* checks if current state has been written to serial */
 void Track(){
@@ -65,16 +72,16 @@ void Track(){
 /* tracks and wrties state to serial */ 
 void trackingState(){
     switch (trackState){
-      case 1: Serial.println("current state: WaitFor7E");
+      case 1: Serial.println("current state: WAIT_FOR_7E");
       hasRun = true;
       break;
-      case 2: Serial.println("current state: WaitForFF");
+      case 2: Serial.println("current state: WAIT_FOR_FF");
       hasRun = true;
       break;
-      case 3: Serial.println("current state: Read");
+      case 3: Serial.println("current state: READ");
       hasRun = true;
       break;
-      case 4: Serial.println("current state: Write");
+      case 4: Serial.println("current state: WRITE");
       hasRun = true;
       break;
       case 5: Serial.println("current state: Address");
@@ -84,7 +91,7 @@ void trackingState(){
       //Serial.write(depthVal);
       hasRun = true;
       break;
-      case 7: Serial.println("reading voltVal");
+      case 7: Serial.println("READing voltVal");
       hasRun = true;
       break;
     }
@@ -95,10 +102,10 @@ void resetAll() {
     analogWrite(pwmPins[i], 0);
     }
 };
-void WaitForFF(){
+//void WaitForFF(){
     //Serial.print("waiting for FF");
     //myservo.writeMicroseconds(1600);
-};
+//};
 //depth values 0-1023
 void takingAverage() {
      depthSum += analogRead(depthPin);
@@ -109,7 +116,7 @@ void takingAverage() {
 void loop() {
     // send data only when you receive data:
     if (Serial.available() > 0) {
-       // read the incoming byte:
+       // READ the incoming byte:
        incomingByte = Serial.read();
        // say what you got:
        //Serial.print("I received: ");
@@ -132,44 +139,44 @@ void loop() {
     
     /*if (incomingByte == 'C'0x7E){
       Serial.print("c is received");
-      currentState = States:: WaitForFF;
+      currentState = States:: WAIT_FOR_FF;
       thrustersOn = 0;
     }*/
         switch(currentState){
-        case States::WaitFor7E:
+        case WAIT_FOR_7E:
             if(hasRun == false){
                 trackState = 1;
                 Track();
             }
             if(incomingByte == 'X'){
-                currentState = States:: WaitForFF;
+                currentState = States:: WAIT_FOR_FF;
                 hasRun = false;
             }
            
             break;
-        case States::WaitForFF:
+        case WAIT_FOR_FF:
             if(hasRun == false){
                 trackState = 2;
                 Track();
             }
             switch(incomingByte){
-                case 'A'/*0x10*/ : currentState = States:: Read; hasRun = false;
+                case 'A'/*0x10*/ : currentState = READ; hasRun = false;
                 break;
-                case 'B' /*0x11*/: currentState = States:: Write; hasRun = false;
+                case 'B' /*0x11*/: currentState = WRITE; hasRun = false;
                 break;
             }
             break;
-        case States:: Read:
+        case READ:
             if(hasRun == false){
                 trackState = 3;
                 Track();
             }
             if(incomingByte == 'C'){ 
                 hasRun = false; 
-                currentState = States:: Address;
+                currentState = ADDRESS;
             }
             break;
-        case States:: Address: 
+        case ADDRESS:
             if(hasRun == false){
                 trackState = 5;
                 Track();
@@ -182,7 +189,7 @@ void loop() {
                     trackState = 6;
                     Track();
                 } 
-                currentState = States:: WaitFor7E;
+                States currentState = WAIT_FOR_7E;;
             } //does voltage have a specific bit?
             else if (incomingByte == 'Y'/*0x21*/){
                 voltageVal = analogRead(voltPin);
@@ -192,7 +199,7 @@ void loop() {
                      trackState = 7;
                      Track();
                 }
-                currentState = States:: WaitFor7E;
+                currentState = WAIT_FOR_7E;
              }
              else if (incomingByte == 'U'/*0x22*/){
                  batteryVal = analogRead(batteryPin);
@@ -201,12 +208,12 @@ void loop() {
                  digitalRead(killPin);
              }
             break;
-        case States:: Write:
+        case States::WRITE:
             if(hasRun == false){
                 trackState = 4;
                 Track();
             }
-            currentState = States:: WaitFor7E;
+            currentState = WAIT_FOR_7E;;
             break;
        
        /* switch(incomingByte){
@@ -219,36 +226,36 @@ void loop() {
             case 0x12 : currentState = States:: SetThrusterDir;
                 break;
             case 0x20 :
-                depthVal = analogRead(depthPin);//
-                Serial.write(depthVal >> 8);//what is the point of this (does it make it more efficient?
-                Serial.write(depthVal & 0xFF);//also what is this doing?
+                depthVal = analogREAD(depthPin);//
+                Serial.WRITE(depthVal >> 8);//what is the point of this (does it make it more efficient?
+                Serial.WRITE(depthVal & 0xFF);//also what is this doing?
                 break;
-            case 0x30 : digitalWrite(killPin, 1);//what does this value mean? does it matter what it is?
+            case 0x30 : digitalWRITE(killPin, 1);//what does this value mean? does it matter what it is?
                 break;
         }
         
     case States::SetThrusters:
        trackState = 5;
         switch(incomingByte){
-          //case 0x00 : read depth sensor
-          //case 0x01 : read kill switch
+          //case 0x00 : READ depth sensor
+          //case 0x01 : READ kill switch
         }
         break;
     case States::SetThrusterDir:
         if(thrustersOn < ThrustPins ) {
               if(incomingByte == 0) {
-                digitalWrite(dirPins[thrustersOn], LOW);
+                digitalWRITE(dirPins[thrustersOn], LOW);
               } else {
-                digitalWrite(dirPins[thrustersOn], HIGH);
+                digitalWRITE(dirPins[thrustersOn], HIGH);
               }
               thrustersOn++;
               
               if(thrustersOn == 4) {
-                currentState = States::WaitFor7E;
+                currentState = States::WAIT_FOR_7E;
                 thrustersOn = 0;
               }
         } else {
-          currentState = States::WaitFor7E;
+          currentState = States::WAIT_FOR_7E;
           thrustersOn = 0;
         }
         break;
@@ -261,17 +268,16 @@ void loop() {
         if(!killed){ //if no input from killpin, continue setting thrusters. problem is that you continue functioning until you receive a kill signal from the killpin 
                    //so if you dont receive that signal you will keep setting motors even after you lose communication with the system.
             if(servoDir == 0) {
-              myServo.writeMicroseconds((int) (1500 - (400.0 / 255.0) * servoSpeed));
+              myServo.WRITEMicroseconds((int) (1500 - (400.0 / 255.0) * servoSpeed));
             } else {
-                  myServo.writeMicroseconds((int) (1500 + (400.0 / 255.0) * servoSpeed));
+                  myServo.WRITEMicroseconds((int) (1500 + (400.0 / 255.0) * servoSpeed));
             }
         } else {  
-              myServo.writeMicroseconds(1500);
+              myServo.WRITEMicroseconds(1500);
         }   
         break;
     case States::On:
-        currentState = States::WaitFor7E;  
+        currentState = States::WAIT_FOR_7E;  
     }*/
 }
 }
-  
