@@ -149,7 +149,7 @@ void loop() {
                 Track();
             }
             if(incomingByte == 'X'){
-                currentState = States:: WAIT_FOR_FF;
+                currentState = WAIT_FOR_FF;
                 hasRun = false;
             }
            
@@ -189,7 +189,7 @@ void loop() {
                     trackState = 6;
                     Track();
                 } 
-                States currentState = WAIT_FOR_7E;;
+                States currentState = WAIT_FOR_7E;
             } //does voltage have a specific bit?
             else if (incomingByte == 'Y'/*0x21*/){
                 voltageVal = analogRead(voltPin);
@@ -208,12 +208,12 @@ void loop() {
                  digitalRead(killPin);
              }
             break;
-        case States::WRITE:
+        case WRITE:
             if(hasRun == false){
                 trackState = 4;
                 Track();
             }
-            currentState = WAIT_FOR_7E;;
+            currentState = WAIT_FOR_7E;
             break;
        
        /* switch(incomingByte){
