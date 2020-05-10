@@ -29,7 +29,7 @@ int servoDir;
 int thrustersOn = 0;
 int pwmPins[ThrustPins] = {3,5,6,11};
 int dirPins[ThrustPins] = {2,4,7,8};
-boolean killed = true;
+boolean killed = false;
 boolean trackCount = false;
 
 /*enum class States {
