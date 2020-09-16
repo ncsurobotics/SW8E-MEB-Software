@@ -9,26 +9,18 @@ int seconds;
 int incomingByte = 0;
 int buttonState = 0; 
 int trackState;
-int depthPin = A0;
-int voltPin = A1;
 int depthAve = 0;
 boolean hasRun = false;
 double timeUsed;
 double depthVal;
 double depthSum;
 int count = 0;
-int killVal;
 int voltageVal;
 int batteryVal;
-int batteryPin = A1;
-int servoPin = 9;
-int killPin = 12; 
 int thrustSpeed = 1500;
 int servoSpeed;
 int servoDir;
 int thrustersOn = 0;
-int pwmPins[ThrustPins] = {3,5,6,11};
-int dirPins[ThrustPins] = {2,4,7,8};
 boolean killed = true;
 boolean trackCount = false;
 
@@ -42,16 +34,17 @@ void setup() {
     Serial.begin(9600);
     myServo.attach(servoPin); //attach servo object to specific pin
     myServo.writeMicroseconds(1500);
-    pinMode(ThrustDir, OUTPUT);
+   // pinMode(ThrustDir, OUTPUT);
     pinMode(depthPin, INPUT);
-    pinMode(killPin, INPUT); 
+    pinMode(killPinInput, INPUT); 
+    pinMode(killPinOutput, OUTPUT);
    /*iterates through each thrust pin and sets its pin mode 
     *(there are 8 so this is more efficient than writing it all out)
     */
-    for(int i = 0; i < ThrustPins; i++) {
+/*    for(int i = 0; i < ThrustPins; i++) {
        pinMode(pwmPins[i], OUTPUT);
        pinMode(dirPins[i], OUTPUT);
-    }
+    }*/
    
  /* digitalWrite(DIR0, HIGH); //delay(1500); analogWrite(PWM0, current0);*/ 
 };
@@ -90,11 +83,11 @@ void trackingState(){
     }
 };
 /* iterate through thrust pins and set them to 0 */
-void resetAll() {
+/*void resetAll() {
     for(int i = 0; i < ThrustPins; i++) {
     analogWrite(pwmPins[i], 0);
     }
-};
+};*/
 void WaitForFF(){
     //Serial.print("waiting for FF");
     //myservo.writeMicroseconds(1600);
@@ -115,18 +108,20 @@ void loop() {
        //Serial.print("I received: ");
        // Serial.println(incomingByte, DEC);
     }
-    killed = digitalRead(killPin); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
-    /*if (killed) {
-      resetAll();
-    }*/
+    killed = digitalRead(killPinInput); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
+    if (killed) {
+      digitalWrite(killPinOutput, HIGH);
+      //resetAll();
+    }
     takingAverage();
-    depthAve = abs(depthSum/count);
+    depthAve = abs(depthSum/count); 
    // Serial.println(depthAve);
     currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
     if (currentMillis - start >= period){  //test whether the period has elapsed
         //9000 is arbitrary integer used as identifier for the serial output
         //it might need to be changed depending on what real depth values the sub achieves
-        Serial.println(900000 + depthAve + .1 * killed);
+        //Serial.println(900000 + depthAve + .1 * killed);
+        Serial.println(killed);
         start = currentMillis;
     }
     
@@ -198,7 +193,7 @@ void loop() {
                  batteryVal = analogRead(batteryPin);
              }
              else if (incomingByte == 'I'/*0x30*/){
-                 digitalRead(killPin);
+                 digitalRead(killPinInput);
              }
             break;
         case States:: Write:
