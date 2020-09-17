@@ -34,10 +34,12 @@ void setup() {
     Serial.begin(9600);
     myServo.attach(servoPin); //attach servo object to specific pin
     myServo.writeMicroseconds(1500);
-   // pinMode(ThrustDir, OUTPUT);
+    pinMode(thrustPinInput, INPUT);
     pinMode(depthPin, INPUT);
-    pinMode(killPinInput, INPUT); 
-    pinMode(killPinOutput, OUTPUT);
+    pinMode(thrusterKillStatus, INPUT); 
+    pinMode(systemKill, OUTPUT);
+    pinMode(thrustPinOutput, OUTPUT);
+     digitalWrite(systemKill, HIGH);
    /*iterates through each thrust pin and sets its pin mode 
     *(there are 8 so this is more efficient than writing it all out)
     */
@@ -108,10 +110,19 @@ void loop() {
        //Serial.print("I received: ");
        // Serial.println(incomingByte, DEC);
     }
-    killed = digitalRead(killPinInput); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
-    if (killed) {
-      digitalWrite(killPinOutput, HIGH);
-      //resetAll();
+    killed = digitalRead(thrusterKillStatus); //the kill pin only receives data if the system needs to be killed so it we kill the motors for any input from killPin
+   
+    if (killed) {   
+       //resetAll();
+       // print to serial/send this to jetson
+    }
+    if (incomingByte == 'L'){//should be input from jetson sent from ros
+      digitalWrite(systemKill, LOW);
+      Serial.println("systemKill = low");
+    }
+    if (incomingByte == 'P'){//should be input from jetson sent from ros
+      digitalWrite(systemKill, HIGH);
+      Serial.println("systemKill = high");
     }
     takingAverage();
     depthAve = abs(depthSum/count); 
@@ -121,7 +132,7 @@ void loop() {
         //9000 is arbitrary integer used as identifier for the serial output
         //it might need to be changed depending on what real depth values the sub achieves
         //Serial.println(900000 + depthAve + .1 * killed);
-        Serial.println(killed);
+       // Serial.println(killed);
         start = currentMillis;
     }
     
@@ -193,7 +204,7 @@ void loop() {
                  batteryVal = analogRead(batteryPin);
              }
              else if (incomingByte == 'I'/*0x30*/){
-                 digitalRead(killPinInput);
+                 digitalRead(thrusterKillStatus);
              }
             break;
         case States:: Write:

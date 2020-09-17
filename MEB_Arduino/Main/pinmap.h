@@ -1,5 +1,7 @@
-int killPinInput = 2;
-int killPinOutput = 3;
+int thrusterKillStatus = 2;
+int systemKill = 3;
+int thrustPinInput = 4;
+int thrustPinOutput = 5;
 
 int depthPin = A0;
 int voltPin = A1;
