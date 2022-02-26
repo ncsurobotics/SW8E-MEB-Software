@@ -7,7 +7,7 @@
 #include<gpio.h>
 #include <msp430.h>
 #include <ws2812.h>
-void init_gpio(){
+void init(){
     // Setting all pins/ports as inputs
     P1DIR = 0;
     P1OUT = 0;
@@ -19,6 +19,8 @@ void init_gpio(){
     P2REN = 0;
     P2SEL = 0;
     P2SEL2 = 0;
+
+
     // Setting the P2.3 as an input pin
     P2DIR &= ~(BIT3);
     P2REN &= ~(BIT3);

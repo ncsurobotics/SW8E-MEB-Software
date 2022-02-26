@@ -8,7 +8,7 @@
 #ifndef INCLUDE_GPIO_H_
 #define INCLUDE_GPIO_H_
 
-void init_gpio(void);
+void init(void);
 
 void sensor(void);
 

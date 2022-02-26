@@ -20,3 +20,4 @@ makefile
 .xdchelp
 # Uniflash session files
 *.uniflashsession
+.settings/
