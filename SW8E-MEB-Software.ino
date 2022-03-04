@@ -45,7 +45,10 @@
 #define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
 #define JETSON_BAUD         9600    // Baud rate for comm with jetson
 
-#define OVER_TEMP           20      // Over temp threshold degrees C
+#define OVER_TEMP           40      // Over temp threshold degrees C
+
+#define SHUTDOWN_NONE       0
+#define SHUTDOWN_LEAK       1
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Globals
@@ -57,6 +60,7 @@ bool prevLeak;                      // Was leak detected last iteration
 unsigned long shutdownTime;         // Time to shutdown at (or after) millis
 bool shutdownEnable;                // Set true to shutdown at given time
 unsigned long shutdownLedBlink;     // Next time to toggle shutdown blink at 
+int shutdownCause = SHUTDOWN_NONE;  // Why was shutdown enabled
 
 
 int8_t aht10Ec = AHT10_ERR_NONE;    // Error code (config / initialize)
@@ -140,6 +144,7 @@ void loop() {
       shutdownTime = now + LEAK_SHUTDOWN_TIME;
       shutdownEnable = true;
       shutdownLedBlink = now;
+      shutdownCause = SHUTDOWN_LEAK;
       digitalWrite(LEAK_LED, HIGH);
     }
   }
@@ -179,6 +184,10 @@ void loop() {
     Serial.println((aht10Ec == 0) ? temp : aht10Ec);
     Serial.print("MEBHumid: ");
     Serial.println((aht10Ec == 0) ? humid : aht10Ec);
+    Serial.print("Leak: ");
+    Serial.println(shutdownEnable && shutdownCause == SHUTDOWN_LEAK);
+    Serial.println("Armed: ");
+    Serial.print(!digitalRead(KILL_STAT));
 
     nextSend += SEND_PERIOD;
   }
