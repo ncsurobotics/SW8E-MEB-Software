@@ -36,7 +36,10 @@ bool AHT10::begin(){
 
   // Wait for no longer busy and calibration complete
   while(readStatus() & AHT10_STATUS_BUSY) delay(AHT10_POLL_PERIOD);
-  while(readStatus() & AHT10_STATUS_CAL) delay(AHT10_POLL_PERIOD);
+
+  // Make sure calibration was successful
+  if(!(readStatus() & AHT10_STATUS_CAL))
+    return false;
 
   return true;
 }

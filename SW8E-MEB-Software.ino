@@ -45,6 +45,8 @@
 #define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
 #define JETSON_BAUD         9600    // Baud rate for comm with jetson
 
+#define OVER_TEMP           20      // Over temp threshold degrees C
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Globals
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,9 +61,10 @@ unsigned long shutdownLedBlink;     // Next time to toggle shutdown blink at
 
 int8_t aht10Ec = AHT10_ERR_NONE;    // Error code (config / initialize)
 AHT10 aht10;                        // AHT10 object
-float temp;                         // Last read temperature
+float temp = 0;                     // Last read temperature
+float humid = 0;                    // Last read humidity
 
-unsigned long nextSend;             // Next time to send sensor data to jetson
+unsigned long nextSend = 0;         // Next time to send sensor data to jetson
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Functions
@@ -101,9 +104,6 @@ void setup() {
   // Shutdown system initial values
   shutdownTime = 0;
   shutdownEnable = false;
-
-  // Default to zero (send immedietly)
-  nextSend = 0;
 }
 
 
@@ -120,9 +120,11 @@ void loop() {
 
 
   // Read AHT10 temp sensor. Turn on red LED if too high
-  if(aht10Ec == AHT10_ERR_NONE){
-    // TODO: Use humidity as well
-    aht10.read(&temp, NULL);
+  if(aht10Ec == AHT10_ERR_NONE && aht10.read(&temp, &humid)){
+#if defined(SDOWN_BLINK_ALL)
+    if(!shutdownEnable)
+#endif
+      digitalWrite(TEMP_LED, (temp > OVER_TEMP) ? HIGH : LOW);
   }
   
 
@@ -172,14 +174,12 @@ void loop() {
 
   // Send sensor data to jetson
   if(now >= nextSend){
-    // TODO: Send other data
+    // TODO: Send other data?
     Serial.print("MEBTemp: ");
-    Serial.println(temp);
+    Serial.println((aht10Ec == 0) ? temp : aht10Ec);
+    Serial.print("MEBHumid: ");
+    Serial.println((aht10Ec == 0) ? humid : aht10Ec);
 
     nextSend += SEND_PERIOD;
   }
-
-  // Slow down execution. Better to use sleep mode, but...
-  // No timings less than millisecond level are used so delay 1ms min between iterations
-  delay(1);
 }
