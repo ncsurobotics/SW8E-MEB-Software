@@ -1,4 +1,6 @@
 
+#include "aht10.hpp"
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Macros
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,27 +36,41 @@
 
 // Shutdown LED behavior (choose one)
 // #define SDOWN_LED_ON             // Shutdown LED is turned on when shutdown scheduled
-// #define SDOWN_LED_BLINK             // Shutdown blinks only its own LED (SDOWN_LED) once shutdown scheduled
-#define SDOWN_BLINK_ALL          // Shutdown blinks all LEDs once shutdown scheduled
+// #define SDOWN_LED_BLINK          // Shutdown blinks only its own LED (SDOWN_LED) once shutdown scheduled
+#define SDOWN_BLINK_ALL             // Shutdown blinks all LEDs once shutdown scheduled
 
+#define AHT10_ERR_NONE      0
+#define AHT10_ERR_INIT      -1
+
+#define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
+#define JETSON_BAUD         9600    // Baud rate for comm with jetson
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Globals
 ///////////////////////////////////////////////////////////////////////////////
 
-unsigned long leakStart;        // When leak first detected
-bool prevLeak;                  // Was leak detected last iteration
+unsigned long leakStart;            // When leak first detected
+bool prevLeak;                      // Was leak detected last iteration
 
-unsigned long shutdownTime;     // Time to shutdown at (or after) millis
-bool shutdownEnable;            // Set true to shutdown at given time
-unsigned long shutdownLedBlink; // Next time to toggle shutdown blink at 
+unsigned long shutdownTime;         // Time to shutdown at (or after) millis
+bool shutdownEnable;                // Set true to shutdown at given time
+unsigned long shutdownLedBlink;     // Next time to toggle shutdown blink at 
 
+
+int8_t aht10Ec = AHT10_ERR_NONE;    // Error code (config / initialize)
+AHT10 aht10;                        // AHT10 object
+float temp;                         // Last read temperature
+
+unsigned long nextSend;             // Next time to send sensor data to jetson
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-void setup() {  
+void setup() {
+  // Setup communication with jetson
+  Serial.begin(JETSON_BAUD);
+  
   // Setup GPIO pins
   pinMode(SYS_POWER, OUTPUT);
   pinMode(KILL_STAT, INPUT);
@@ -73,6 +89,11 @@ void setup() {
   digitalWrite(THRU_LED, LOW);        // Thruster kill status LED off by default 
   digitalWrite(SDOWN_LED, LOW);       // Currently unused white LED off by default
 
+  // Start AHT10
+  if(!aht10.begin()){
+    aht10Ec = AHT10_ERR_INIT;
+  }
+
   // Leak detection initial values
   leakStart = 0;
   prevLeak = LOW;
@@ -80,6 +101,9 @@ void setup() {
   // Shutdown system initial values
   shutdownTime = 0;
   shutdownEnable = false;
+
+  // Default to zero (send immedietly)
+  nextSend = 0;
 }
 
 
@@ -95,7 +119,12 @@ void loop() {
   digitalWrite(THRU_LED, !digitalRead(KILL_STAT));
 
 
-  // TODO: Read AHT10 temp sensor. If temp too high, turn on overtemp LED
+  // Read AHT10 temp sensor. Turn on red LED if too high
+  if(aht10Ec == AHT10_ERR_NONE){
+    // TODO: Use humidity as well
+    aht10.read(&temp, NULL);
+  }
+  
 
 
   // Check for leak detection
@@ -137,6 +166,17 @@ void loop() {
     #if defined(SDOWN_LED_ON)
       digitalWrite(SDOWN_LED, HIGH);
     #endif
+  }
+
+  // TODO: Use single place to update all LEDs
+
+  // Send sensor data to jetson
+  if(now >= nextSend){
+    // TODO: Send other data
+    Serial.print("MEBTemp: ");
+    Serial.println(temp);
+
+    nextSend += SEND_PERIOD;
   }
 
   // Slow down execution. Better to use sleep mode, but...
