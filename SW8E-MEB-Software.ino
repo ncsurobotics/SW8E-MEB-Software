@@ -186,8 +186,8 @@ void loop() {
     Serial.println((aht10Ec == 0) ? humid : aht10Ec);
     Serial.print("Leak: ");
     Serial.println(shutdownEnable && shutdownCause == SHUTDOWN_LEAK);
-    Serial.println("Armed: ");
-    Serial.print(!digitalRead(KILL_STAT));
+    Serial.print("Armed: ");
+    Serial.println(!digitalRead(KILL_STAT));
 
     nextSend += SEND_PERIOD;
   }
