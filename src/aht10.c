@@ -44,6 +44,8 @@ void i2c_b0_init(){
     // Configure P1.6 and P1.7 for I2C
         P1SEL  |= BIT6 + BIT7;
         P1SEL2 |= BIT6 + BIT7;
+        //P2SEL  |= BIT1 + BIT2
+        //P2SEL2 |= BIT1 + BIT2
 
         // Put UCB0 in reset so it is able to be configured
         UCB0CTL1 = UCSWRST;
@@ -51,9 +53,9 @@ void i2c_b0_init(){
         // I2C Master mode synchronous
         UCB0CTL0 = UCMST | UCMODE_3 | UCSYNC;
 
-        // SMCLK = 1MHz / 10 = 100kHz
+        // SMCLK = 16MHz / 160 = 100kHz
         // a standard I2C clock rate that should work with the AHT10
-        UCB0BR0 = 10;
+        UCB0BR0 = 160;
         UCB0BR1 = 0;
 
         // Take out of reset and use SMCLK as source clock

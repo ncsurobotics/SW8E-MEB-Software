@@ -14,11 +14,11 @@ static LED leds[NUM_LEDS] = { { 0, 0, 0 } };
 void initStrip() {
     P1SEL |= OUTPUT_PIN;    // configure output pin as SPI output
     P1SEL2 |= OUTPUT_PIN;
-    UCB0CTL0 |= UCCKPH + UCMSB + UCMST + UCSYNC; // 3-pin, MSB, 8-bit SPI master
-    UCB0CTL1 |= UCSSEL_2;   // SMCLK source (16 MHz)
-    UCB0BR0 = 3;            // 16 MHz / 3 = .1875 us per bit
-    UCB0BR1 = 0;
-    UCB0CTL1 &= ~UCSWRST;   // Initialize USCI state machine
+    UCA0CTL0 |= UCCKPH + UCMSB + UCMST + UCSYNC; // 3-pin, MSB, 8-bit SPI master
+    UCA0CTL1 |= UCSSEL_2;   // SMCLK source (16 MHz)
+    UCA0BR0 = 3;            // 16 MHz / 3 = .1875 us per bit
+    UCA0BR1 = 0;
+    UCA0CTL1 &= ~UCSWRST;   // Initialize USCI state machine
     clearStrip();           // clear the strip
 }
 
@@ -44,12 +44,12 @@ void showStrip() {
 
             // check each of the 8 bits
             while (mask != 0) {
-                while (!(IFG2 & UCB0TXIFG))
+                while (!(IFG2 & UCA0TXIFG))
                     ;    // wait to transmit
                 if (rgb[j] & mask) {        // most significant bit first
-                    UCB0TXBUF = HIGH_CODE;  // send 1
+                    UCA0TXBUF = HIGH_CODE;  // send 1
                 } else {
-                    UCB0TXBUF = LOW_CODE;   // send 0
+                    UCA0TXBUF = LOW_CODE;   // send 0
                 }
 
                 mask >>= 1;  // check next bit

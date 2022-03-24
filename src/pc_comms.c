@@ -114,6 +114,20 @@ void send_string_to_pc(const char *message){
           aht10_init();
           IE2 |= UCA0RXIE;
           send_string_to_pc(SENSOR_ON_MSG);
+          uca0_rx_buffer_pos = 0;
+          while(UCA0RXBUF != 'b'){
+              char temp_str[10];
+              float temp = aht10_read_temp();
+              sprintf(temp_str, "%d.%d\r\n", (int)temp, (int)((temp - (int)temp) * 100));
+              send_string_to_pc(temp_str);
+              __delay_cylcles(.5e6);
+              if(strcmp((const char*)uca0_rx_buffer, "off") == 0){
+                        // Send temperature data
+                        disable_sensors();
+                        send_string_to_pc(SENSOR_OFF_MSG);
+                    }
+          }
+
       }
       else if(strcmp((const char*)uca0_rx_buffer, "off") == 0){
           // Send temperature data
