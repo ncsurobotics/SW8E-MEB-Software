@@ -35,7 +35,7 @@ void showStrip() {
 
     // send RGB color for every LED
     unsigned int i, j;
-    for (i = 0; i < NUM_LEDS; i++) {
+    for (i = 0; i < 4; i++) {
         u_char *rgb = (u_char *)&leds[i]; // get GRB color for this LED
 
         // send green, then red, then blue

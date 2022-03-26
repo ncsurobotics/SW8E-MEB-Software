@@ -21,7 +21,7 @@ void init(){
     P2SEL2 = 0;
 
 
-    // Setting the P2.3 as an input pin
+    // Setting the P2.7 as an input pin
     P2DIR &= ~(BIT7);
     P2REN &= ~(BIT7);
     initStrip();
@@ -30,9 +30,11 @@ void init(){
 
 void sensor(){
             // Performing AND operation of the P2IN register with BIT3(P2.7) to test if there is input
-            if(P2IN & BIT3){
+            if(P2IN & BIT7){
                 // High(change led color)
-                fillStrip(0xFF,0xFF,0x00); // yellow for leakage
+                //fillStrip(0xFF,0x00,0x00); // yellow for leakage
+                setLEDColor(2,0x00,0x00,0xFF);
+                setLEDColor(3,0x00,0x00,0xFF);
                 showStrip();
             }
             else{
