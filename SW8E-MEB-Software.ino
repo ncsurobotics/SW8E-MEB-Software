@@ -99,7 +99,7 @@ void loop() {
 
 
   // Check for leak detection
-  int leak = digitalRead(LEAK_SEN);
+  int leak = digitalRead(LEAK_SEN) == LOW;
   if (leak && !prevLeak) {
     // Leak just now detected
     leakStart = now;
