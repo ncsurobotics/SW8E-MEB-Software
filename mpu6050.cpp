@@ -120,20 +120,15 @@ bool MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, floa
   uint8_t rawData[6];
   
   // Read gyro data
-  Serial.println("A");
   wire->beginTransmission(addr);
   wire->write(MPU6050_GYRO_OUT);
   wire->endTransmission(true);
-  Serial.println("B");
   uint8_t len = wire->requestFrom(addr, 6);
-  Serial.println("C");
   for(uint8_t i =0; i < len; ++i){
     rawData[i] = wire->read();
   }
-  Serial.println("D");
   if(len != 6)
     return false;
-  Serial.println("E");
 
   // Conversion to deg / sec (depends on configured range)
   // 131.0f = 250DPS
@@ -145,21 +140,15 @@ bool MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, floa
   *gyroZ = (int16_t)(rawData[5] | (rawData[4] << 8)) / 65.5f;
 
   // Read accel data
-  delay(100);
-  Serial.println("F");
   wire->beginTransmission(addr);
   wire->write(MPU6050_ACCEL_OUT);
   wire->endTransmission(true);
-  Serial.println("G");
   len = wire->requestFrom(addr, 6);
-  Serial.println("H");
   for(uint8_t i =0; i < len; ++i){
     rawData[i] = wire->read();
   }
-  Serial.println("I");
   if(len != 6)
     return false;
-  Serial.println("J");
 
   // Scaling of values depends both on mode and range
   // Sensor is in high resolution mode so:
@@ -171,14 +160,10 @@ bool MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, floa
   *accelY = (int16_t)((rawData[3] | (rawData[2] << 8))) / 16384.0f;
   *accelZ = (int16_t)((rawData[5] | (rawData[4] << 8))) / 16384.0f;
 
-  Serial.println("K");
-
   // Convert from g's to m / s^2
   *accelX *= 9.80665f;
   *accelY *= 9.80665f;
   *accelZ *= 9.80665f;
-
-  Serial.println("L");
-
+  
   return true;
 }
