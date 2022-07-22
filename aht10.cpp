@@ -13,11 +13,11 @@ bool AHT10::begin(){
   delay(AHT10_POWER_DELAY);
 
   // I2C master mode
-  wire->begin();
+  // wire->begin();
 
   // Make sure device exists (detect device at address)
   wire->beginTransmission(addr);
-  if(wire->endTransmission() != 0){
+  if(wire->endTransmission(true) != 0){
     wire->end();
     return false;
   }
@@ -25,14 +25,14 @@ bool AHT10::begin(){
   // Reset
   wire->beginTransmission(addr);
   wire->write(AHT10_CMD_RESET);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Calibrate
   wire->beginTransmission(addr);
   wire->write(AHT10_CMD_CALIBRATE);
   wire->write(0x08);
   wire->write(0x00);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Wait for no longer busy and calibration complete
   while(readStatus() & AHT10_STATUS_BUSY) delay(AHT10_POLL_PERIOD);
@@ -55,7 +55,7 @@ bool AHT10::read(float *temp, float *humidity){
   wire->write(AHT10_CMD_TRIGGER);
   wire->write(0x33);
   wire->write(0x00);
-  if(wire->endTransmission() != 0){
+  if(wire->endTransmission(true) != 0){
     return false;
   }
 
@@ -64,12 +64,11 @@ bool AHT10::read(float *temp, float *humidity){
 
   // Read raw data
   uint8_t rawData[6];
-  if(wire->requestFrom(addr, 6) != 6){
-    return false;
-  }
-  for(uint8_t i = 0; i < 6; ++i){
+  uint8_t len = wire->requestFrom(addr, 6);
+  for(uint8_t i = 0; i < len; ++i){
     rawData[i] = wire->read();
   }
+  if(len != 6) return false;
 
   // Calculate humidity as needed
   if(humidity != NULL){
@@ -96,6 +95,10 @@ bool AHT10::read(float *temp, float *humidity){
 }
 
 uint8_t AHT10::readStatus() {
-  wire->requestFrom(addr, 1);
+  uint8_t len = 0;
+  while(len != 1){
+    len = wire->requestFrom(addr, 1);
+    delay(1);
+  }
   return wire->read();
 }

@@ -1,6 +1,7 @@
 
 #include "aht10.hpp"
 #include "mpu6050.hpp"
+#include <Wire.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Macros
@@ -76,7 +77,7 @@
 #define MPU6050_ERR_INIT    -1
 
 #define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
-#define IMU_SEND_PERIOD     500     // Period (ms) between sending IMU data to jetson
+#define IMU_SEND_PERIOD     10      // Period (ms) between sending IMU data to jetson
 #define JETSON_BAUD         9600    // Baud rate for comm with jetson
 
 #define OVER_TEMP           40      // Over temp threshold degrees C
@@ -140,6 +141,9 @@ void setup() {
   digitalWrite(THRU_LED, LOW);        // Thruster kill status LED off by default 
   digitalWrite(SDOWN_LED, LOW);       // Currently unused white LED off by default
 
+  // Setup I2C in master mode
+  Wire.begin();
+
   // Start AHT10
   if(!aht10.begin()){
     aht10Ec = AHT10_ERR_INIT;
@@ -174,7 +178,7 @@ void setup() {
 
 void loop() {
   unsigned long now = millis();
-  
+
   // Update thruster kill status LED
   // Thruster kill status signal low = thrusters armed (relay coil- grounded)
   // LED should be on when thrusters armed
@@ -193,9 +197,7 @@ void loop() {
   }
 
   // Read MPU6050 data
-  if(imuEc == MPU6050_ERR_NONE){
-    imu.read(&gyroX, &gyroY, &gyroZ, &accelX, &accelY, &accelZ);
-
+  if(imuEc == MPU6050_ERR_NONE && imu.read(&gyroX, &gyroY, &gyroZ, &accelX, &accelY, &accelZ)){
     // Accumulate angle
     unsigned long nowimu = micros();
     angleZ += (gyroZ - gzcal) * ((nowimu - lastImuSample) / 1e6f);
@@ -258,6 +260,7 @@ void loop() {
     Serial.println(shutdownEnable && shutdownCause == SHUTDOWN_LEAK);
     Serial.print("Armed: ");
     Serial.println(!digitalRead(KILL_STAT));
+    Serial.flush();
 
     nextSend += SEND_PERIOD;
   }

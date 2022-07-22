@@ -13,11 +13,11 @@ bool MPU6050::begin(){
   delay(MPU6050_POWER_DELAY);
 
   // I2C master mode
-  wire->begin();
+  // wire->begin();
 
   // Make sure device exists (detect device at address)
   wire->beginTransmission(addr);
-  if(wire->endTransmission() != 0){
+  if(wire->endTransmission(true) != 0){
     wire->end();
     return false;
   }
@@ -25,20 +25,20 @@ bool MPU6050::begin(){
   // Reset MPU6050
   wire->beginTransmission(addr);
   wire->write(MPU6050_PWR_MGMT_1);
-  wire->endTransmission();
+  wire->endTransmission(true);
   wire->requestFrom(addr, 1);
   uint8_t pm1val = wire->read();
   pm1val |= 0x80;        // Set bit 7
   wire->beginTransmission(addr);
   wire->write(MPU6050_PWR_MGMT_1);
   wire->write(pm1val);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Wait for reset to finish
   while(true){
     wire->beginTransmission(addr);
     wire->write(MPU6050_PWR_MGMT_1);
-    wire->endTransmission();
+    wire->endTransmission(true);
     wire->requestFrom(addr, 1);
     pm1val = wire->read();
 
@@ -53,31 +53,31 @@ bool MPU6050::begin(){
   wire->beginTransmission(addr);
   wire->write(MPU6050_SIGNAL_PATH_RESET);
   wire->write(0x07);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Sample rate divider = 0
   wire->beginTransmission(addr);
   wire->write(MPU6050_SMPLRT_DIV);
   wire->write(0x00);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Disable low pass filter
   wire->beginTransmission(addr);
   wire->write(MPU6050_CONFIG);
-  wire->endTransmission();
+  wire->endTransmission(true);
   wire->requestFrom(addr, 1);
   uint8_t cfgval = wire->read();
   cfgval &= ~(0x7);   // Zero lowest three bits to disable lpf
   wire->beginTransmission(addr);
   wire->write(MPU6050_CONFIG);
   wire->write(cfgval);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Set clk = pll w/ gyro x ref
   wire->beginTransmission(addr);
   wire->write(MPU6050_PWR_MGMT_1);
   wire->write(0x01);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Set gyro range
   // 0x00 = 250DPS
@@ -86,7 +86,7 @@ bool MPU6050::begin(){
   // 0x03 = 2000DPS
   wire->beginTransmission(addr);
   wire->write(MPU6050_GYRO_CONFIG);
-  wire->endTransmission();
+  wire->endTransmission(true);
   wire->requestFrom(addr, 1);
   uint8_t gyrocfgval = wire->read();
   gyrocfgval &= ~(0x18);      // Zero bits 4 and 3
@@ -94,7 +94,7 @@ bool MPU6050::begin(){
   wire->beginTransmission(addr);
   wire->write(MPU6050_GYRO_CONFIG);
   wire->write(gyrocfgval);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   // Set accel range
   // 0x00 = +/- 2G
@@ -103,7 +103,7 @@ bool MPU6050::begin(){
   // 0x03 = +/- 16G
   wire->beginTransmission(addr);
   wire->write(MPU6050_ACCEL_CONFIG);
-  wire->endTransmission();
+  wire->endTransmission(true);
   wire->requestFrom(addr, 1);
   uint8_t accelcfgval = wire->read();
   accelcfgval &= ~(0x18);      // Zero bits 4 and 3
@@ -111,22 +111,29 @@ bool MPU6050::begin(){
   wire->beginTransmission(addr);
   wire->write(MPU6050_ACCEL_CONFIG);
   wire->write(accelcfgval);
-  wire->endTransmission();
+  wire->endTransmission(true);
 
   return true;
 }
 
-void MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, float *accelY, float *accelZ){
+bool MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, float *accelY, float *accelZ){
   uint8_t rawData[6];
   
   // Read gyro data
+  Serial.println("A");
   wire->beginTransmission(addr);
   wire->write(MPU6050_GYRO_OUT);
-  wire->endTransmission();
-  wire->requestFrom(addr, 6);
-  for(uint8_t i =0; i < 6; ++i){
+  wire->endTransmission(true);
+  Serial.println("B");
+  uint8_t len = wire->requestFrom(addr, 6);
+  Serial.println("C");
+  for(uint8_t i =0; i < len; ++i){
     rawData[i] = wire->read();
   }
+  Serial.println("D");
+  if(len != 6)
+    return false;
+  Serial.println("E");
 
   // Conversion to deg / sec (depends on configured range)
   // 131.0f = 250DPS
@@ -138,13 +145,21 @@ void MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, floa
   *gyroZ = (int16_t)(rawData[5] | (rawData[4] << 8)) / 65.5f;
 
   // Read accel data
+  delay(100);
+  Serial.println("F");
   wire->beginTransmission(addr);
   wire->write(MPU6050_ACCEL_OUT);
-  wire->endTransmission();
-  wire->requestFrom(addr, 6);
-  for(uint8_t i =0; i < 6; ++i){
+  wire->endTransmission(true);
+  Serial.println("G");
+  len = wire->requestFrom(addr, 6);
+  Serial.println("H");
+  for(uint8_t i =0; i < len; ++i){
     rawData[i] = wire->read();
   }
+  Serial.println("I");
+  if(len != 6)
+    return false;
+  Serial.println("J");
 
   // Scaling of values depends both on mode and range
   // Sensor is in high resolution mode so:
@@ -156,8 +171,14 @@ void MPU6050::read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, floa
   *accelY = (int16_t)((rawData[3] | (rawData[2] << 8))) / 16384.0f;
   *accelZ = (int16_t)((rawData[5] | (rawData[4] << 8))) / 16384.0f;
 
+  Serial.println("K");
+
   // Convert from g's to m / s^2
   *accelX *= 9.80665f;
   *accelY *= 9.80665f;
   *accelZ *= 9.80665f;
+
+  Serial.println("L");
+
+  return true;
 }

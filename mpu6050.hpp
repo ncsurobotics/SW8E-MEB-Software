@@ -34,7 +34,7 @@ public:
   MPU6050(TwoWire *wire = NULL, int addr = MPU6050_ADDRESS_DEFAULT);
   bool begin();
   void end();
-  void read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, float *accelY, float *accelZ);
+  bool read(float *gyroX, float *gyroY, float *gyroZ, float *accelX, float *accelY, float *accelZ);
 
 private:
   TwoWire *wire;
