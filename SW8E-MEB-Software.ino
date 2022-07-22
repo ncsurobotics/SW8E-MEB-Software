@@ -78,7 +78,7 @@
 
 #define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
 #define IMU_SEND_PERIOD     10      // Period (ms) between sending IMU data to jetson
-#define JETSON_BAUD         9600    // Baud rate for comm with jetson
+#define JETSON_BAUD         57600   // Baud rate for comm with jetson
 
 #define OVER_TEMP           40      // Over temp threshold degrees C
 
@@ -119,6 +119,39 @@ unsigned long nextImuSend = 0;      // Next time to send IMU data to jetson
 /// Functions
 ///////////////////////////////////////////////////////////////////////////////
 
+void imuCalibrate(uint16_t numSamples){
+  if(imuEc != MPU6050_ERR_NONE)
+    return;
+  
+  delay(500);
+  gxcal = 0;
+  gycal = 0;
+  gzcal = 0;
+  axcal = 0;
+  aycal = 0;
+  azcal = 0;
+
+  for(uint16_t i = 0; i < numSamples; ++i){
+    if(imu.read(&gyroX, &gyroY, &gyroZ, &accelX, &accelY, &accelZ)){
+      gxcal += gyroX;
+      gycal += gyroY;
+      gzcal += gyroZ;
+
+      axcal += accelX;
+      aycal += accelY;
+      azcal += (accelZ - 9.80665f);   // Z axis reads +g when IMU level
+      delay(1);
+    }
+  }
+
+  gxcal /= numSamples;
+  gycal /= numSamples;
+  gzcal /= numSamples;
+  axcal /= numSamples;
+  aycal /= numSamples;
+  azcal /= numSamples;
+}
+
 void setup() {
   // Setup communication with jetson
   Serial.begin(JETSON_BAUD);
@@ -154,17 +187,12 @@ void setup() {
     imuEc = MPU6050_ERR_INIT;
   }
 
-  // TODO: Implement calibration
-  gxcal = 0;
-  gycal = 0;
-  gzcal = 0;
-  axcal = 0;
-  aycal = 0;
-  azcal = 0;
-
+  // Calibrate imu
+  imuCalibrate(20);
+  
   // Initial values for IMU
   angleZ = 0;
-  lastImuSample = 0;
+  lastImuSample = micros();
 
   // Leak detection initial values
   leakStart = 0;
@@ -200,7 +228,9 @@ void loop() {
   if(imuEc == MPU6050_ERR_NONE && imu.read(&gyroX, &gyroY, &gyroZ, &accelX, &accelY, &accelZ)){
     // Accumulate angle
     unsigned long nowimu = micros();
-    angleZ += (gyroZ - gzcal) * ((nowimu - lastImuSample) / 1e6f);
+    unsigned long dt = nowimu - lastImuSample;
+    float delta = (gyroZ - gzcal) * (dt / 1e6f);
+    angleZ += delta;
     lastImuSample = nowimu;
   }
 
