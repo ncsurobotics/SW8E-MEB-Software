@@ -1,6 +1,5 @@
 
 #include "aht10.hpp"
-#include "mpu6050.hpp"
 #include <Wire.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,9 +72,6 @@
 #define AHT10_ERR_NONE      0
 #define AHT10_ERR_INIT      -1
 
-#define MPU6050_ERR_NONE    0
-#define MPU6050_ERR_INIT    -1
-
 #define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
 #define IMU_SEND_PERIOD     10      // Period (ms) between sending IMU data to jetson
 #define JETSON_BAUD         57600   // Baud rate for comm with jetson
@@ -103,54 +99,11 @@ AHT10 aht10;                        // AHT10 object
 float temp = 0;                     // Last read temperature
 float humid = 0;                    // Last read humidity
 
-int8_t imuEc = MPU6050_ERR_NONE;    // MPU6050 error code (config / init)
-MPU6050 imu;                        // MPU6050 object
-float gyroX, gyroY, gyroZ;          // Rotation rates (deg / sec)
-float accelX, accelY, accelZ;       // Accel rates (m / s^2)
-float angleZ;                       // Accumulated gyro Z angle
-float gxcal, gycal, gzcal;          // Gyro calibration values
-float axcal, aycal, azcal;          // Accel calibration values
-unsigned long lastImuSample;        // Last time IMU was sampled (used for accumulation)
-
 unsigned long nextSend = 0;         // Next time to send sensor data to jetson
-unsigned long nextImuSend = 0;      // Next time to send IMU data to jetson
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Functions
 ///////////////////////////////////////////////////////////////////////////////
-
-void imuCalibrate(uint16_t numSamples){
-  if(imuEc != MPU6050_ERR_NONE)
-    return;
-  
-  delay(500);
-  gxcal = 0;
-  gycal = 0;
-  gzcal = 0;
-  axcal = 0;
-  aycal = 0;
-  azcal = 0;
-
-  for(uint16_t i = 0; i < numSamples; ++i){
-    if(imu.read(&gyroX, &gyroY, &gyroZ, &accelX, &accelY, &accelZ)){
-      gxcal += gyroX;
-      gycal += gyroY;
-      gzcal += gyroZ;
-
-      axcal += accelX;
-      aycal += accelY;
-      azcal += (accelZ - 9.80665f);   // Z axis reads +g when IMU level
-      delay(1);
-    }
-  }
-
-  gxcal /= numSamples;
-  gycal /= numSamples;
-  gzcal /= numSamples;
-  axcal /= numSamples;
-  aycal /= numSamples;
-  azcal /= numSamples;
-}
 
 void setup() {
   // Setup communication with jetson
@@ -182,18 +135,6 @@ void setup() {
     aht10Ec = AHT10_ERR_INIT;
   }
 
-  // Start imu
-  if(!imu.begin()){
-    imuEc = MPU6050_ERR_INIT;
-  }
-
-  // Calibrate imu
-  imuCalibrate(20);
-  
-  // Initial values for IMU
-  angleZ = 0;
-  lastImuSample = micros();
-
   // Leak detection initial values
   leakStart = 0;
   prevLeak = LOW;
@@ -223,17 +164,6 @@ void loop() {
 #endif
       digitalWrite(TEMP_LED, (temp > OVER_TEMP) ? HIGH : LOW);
   }
-
-  // Read MPU6050 data
-  if(imuEc == MPU6050_ERR_NONE && imu.read(&gyroX, &gyroY, &gyroZ, &accelX, &accelY, &accelZ)){
-    // Accumulate angle
-    unsigned long nowimu = micros();
-    unsigned long dt = nowimu - lastImuSample;
-    float delta = (gyroZ - gzcal) * (dt / 1e6f);
-    angleZ += delta;
-    lastImuSample = nowimu;
-  }
-
 
   // Check for leak detection
   int leak = digitalRead(LEAK_SEN) == HIGH;
@@ -293,12 +223,5 @@ void loop() {
     Serial.flush();
 
     nextSend += SEND_PERIOD;
-  }
-
-  if(now >= nextImuSend){
-    // TODO: Other values?
-    Serial.print("GyroZ: ");
-    Serial.println((imuEc == 0) ? angleZ : imuEc);
-    nextImuSend += IMU_SEND_PERIOD; 
   }
 }
