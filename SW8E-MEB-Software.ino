@@ -73,7 +73,6 @@
 #define AHT10_ERR_INIT      -1
 
 #define SEND_PERIOD         500     // Period (ms) between sending sensor data to jetson
-#define IMU_SEND_PERIOD     10      // Period (ms) between sending IMU data to jetson
 #define JETSON_BAUD         57600   // Baud rate for comm with jetson
 
 #define OVER_TEMP           40      // Over temp threshold degrees C
