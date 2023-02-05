@@ -1,6 +1,10 @@
 # SW8-Microcontrollers
 Microcontroller Code for Seawolf 8 Electronics
 
+Designed for MSP430 launchpad boards (currently G2ET w/ G2553 chip and FR2433 are supported). Can build with [Energia](https://energia.nu/).
+
+Alternatively can use the [Arduino IDE](https://www.arduino.cc/en/software) using [this boards package](https://github.com/Andy4495/TI_Platform_Cores_For_Arduino)
+
 
 ## Communication Protocol
 
