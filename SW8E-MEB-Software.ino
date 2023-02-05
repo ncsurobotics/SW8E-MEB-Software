@@ -143,7 +143,32 @@ void task_read_sensors(){
 }
 
 void task_send_sensor_data(){
-  // TODO: Write sensor data to PC using new comm object
+  static uint8_t buf[MAX_MSG_LEN];
+
+  // Send AHT10 data
+  buf[0] = 'T';
+  buf[1] = 'E';
+  buf[2] = 'M';
+  buf[3] = 'P';
+  Conversions::convertFloatToData(temp, &buf[4], true);
+  Conversions::convertFloatToData(humid, &buf[8], true);
+  comm.sendMessage(buf, 12);
+
+  // Send leak status
+  buf[0] = 'L';
+  buf[1] = 'E';
+  buf[2] = 'A';
+  buf[3] = 'K';
+  buf[4] = leak_detected;
+  comm.sendMessage(buf, 5);
+
+  // Send arm / kill status (NET arm / kill)
+  buf[0] = 'T';
+  buf[1] = 'A';
+  buf[2] = 'R';
+  buf[3] = 'M';
+  buf[4] = !digitalRead(KILL_STAT);
+  comm.sendMessage(buf, 5);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
