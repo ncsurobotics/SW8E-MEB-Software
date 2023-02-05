@@ -12,13 +12,9 @@ AHT10::AHT10(TwoWire *wire, int addr) : wire(wire), addr(addr){
 bool AHT10::begin(){
   delay(AHT10_POWER_DELAY);
 
-  // I2C master mode
-  // wire->begin();
-
   // Make sure device exists (detect device at address)
   wire->beginTransmission(addr);
   if(wire->endTransmission(true) != 0){
-    wire->end();
     return false;
   }
 
@@ -45,8 +41,7 @@ bool AHT10::begin(){
 }
 
 void AHT10::end() {
-  if(this->wire != NULL)
-    this->wire->end();
+  // empty
 }
 
 bool AHT10::read(float *temp, float *humidity){
