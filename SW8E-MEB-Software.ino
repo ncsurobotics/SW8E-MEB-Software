@@ -165,7 +165,8 @@ public:
   unsigned long last_run;
 };
 
-Task tasks[] = {
+#define NTASKS    4
+Task tasks[NTASKS] = {
   //      Target function               period (ms)           start delay(ms)
   Task(   &task_shutdown,               100,                  30               ),
   Task(   &task_update_leds,            100,                  25               ),
@@ -218,6 +219,6 @@ void loop(){
 
   // Check the next task next iteraion
   curr_task++;  
-  if(curr_task > sizeof(tasks))
+  if(curr_task > NTASKS)
     curr_task = 0;  
 }
