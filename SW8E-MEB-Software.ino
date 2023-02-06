@@ -288,9 +288,9 @@ void loop(){
   }
 
   // Check the next task next iteraion
-  curr_task++;  
-  if(curr_task > NTASKS)
-    curr_task = 0;  
+  curr_task++;
+  if(curr_task == NTASKS)
+    curr_task = 0;
 }
 
 
