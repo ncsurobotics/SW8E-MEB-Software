@@ -171,6 +171,50 @@ void task_send_sensor_data(){
   comm.sendMessage(buf, 5);
 }
 
+void task_receive_pc(){
+  static uint8_t msg[MAX_MSG_LEN];
+  static uint16_t msg_id;
+  static unsigned int msg_len;
+
+  // Helper macros for comparisons
+  #define MSG_STARTS_WITH(x)      data_startswith(msg, msg_len, (x), sizeof((x)))
+  #define MSG_EQUALS(x)           data_matches(msg, msg_len, (x), sizeof(x))
+
+  if(!comm.readMessage(msg, msg_len, msg_id)){
+    // No message
+    return;
+  }
+
+  // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
+  /*
+  EXAMPLE MESSAGE HANDLING CODE
+
+  if(MSG_EQUALS(((uint8_t[]){'M', 'S', 'G', 'A'}))){
+    do_something();
+    comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
+  }else if(MSG_STARTS_WITH(((uint8_t[]){'M', 'S', 'G', 'B'}))){
+    // Validate length (right number of arguments)
+    if(msg_len != 8){
+      comm.acknowledge(msg_id, ACK_ERR_INVALID_ARGS, NULL, 0);
+      return;
+    }
+    
+    // Make sure this command's action is allowed (ie resources it requires are avaiable)
+    if(!required_sensor_available()){
+      comm.acknowledge(msg_id, ACK_ERR_INVALID_CMDS, NULL, 0);
+      return;
+    }
+    
+    // Get arguments
+    float arg = Conversions::convertDataToFloat(&msg[4], true);
+    
+    // Perform the requested action and acknowledge with no error
+    do_something_with_sensor(arg);
+    comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
+  }
+  */
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -190,13 +234,14 @@ public:
   unsigned long last_run;
 };
 
-#define NTASKS    4
+#define NTASKS    5
 Task tasks[NTASKS] = {
   //      Target function               period (ms)           start delay(ms)
   Task(   &task_shutdown,               100,                  30               ),
   Task(   &task_update_leds,            100,                  25               ),
   Task(   &task_read_sensors,           50,                   0                ),
-  Task(   &task_send_sensor_data,       50,                   10               )
+  Task(   &task_send_sensor_data,       50,                   10               ),
+  Task(   &task_receive_pc,             20,                   5                )
 };
 
 void setup(){
@@ -247,3 +292,48 @@ void loop(){
   if(curr_task > NTASKS)
     curr_task = 0;  
 }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Helper functions
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Check if two byte arrays are identical
+ * @param a First byte array
+ * @param len_a Length of first array
+ * @param b Second byte array
+ * @param len_b Length of second array
+ * @return true If arrays match
+ * @return false If arrays do not match
+ */
+static bool data_matches(const uint8_t *a, uint32_t len_a, const uint8_t *b, uint32_t len_b){
+    if(len_a != len_b)
+        return false;
+    for(uint32_t i = 0; i < len_a; ++i){
+        if(a[i] != b[i])
+            return false;
+    }
+    return true;
+}
+
+/**
+ * Check if one array starts with the data in another array
+ * @param a The array to search in ("full" data)
+ * @param len_a Length of array a
+ * @param b The array to search for ("sub" / "prefix" data)
+ * @param len_b Length of array b
+ * @return true If array a starts with array b
+ * @return false If array a does not start with array b
+ */
+static bool data_startswith(const uint8_t *a, uint32_t len_a, const uint8_t *b, uint32_t len_b){
+    if(len_a < len_b)
+        return false;
+    for(uint32_t i = 0; i < len_b; ++i){
+        if(a[i] != b[i])
+            return false;
+    }
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

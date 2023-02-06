@@ -143,6 +143,16 @@ bool Communication::readMessage(uint8_t *msg, unsigned int &msg_len, unsigned in
 
                 if(read_crc == calc_crc){
                     // This is a complete, valid message
+                    
+                    // First two bytes are msg_id (big endian)
+                    msg_id = Conversions::convertDataToInt16(read_buf, false);
+
+                    // Last two bytes omitted from copied data because they are crc
+                    for(unsigned int i = 0; i < read_buf_count - 4; ++i){
+                      msg[i] = read_buf[i + 2];
+                    }
+                    msg_len = read_buf_count - 4;
+
                     return true;
                 }else{
                     // Got a complete message, but it is invalid. Ignore it.

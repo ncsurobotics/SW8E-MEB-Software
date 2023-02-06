@@ -47,9 +47,9 @@ public:
    * @param msg Buffer to store the message in (must be size MAX_MSG_LEN)
    * @param msg_len Where to store length of data in msg buffer (reference)
    * @param msg_id Where to store id of received message (reference)
-   * @return True if a message was received; else false
+   * @return True if a message was received; else false. msg, msg_id, and msg_len are only assigned if true.
    */
-  bool readMessage(uint8_t *msg, unsigned int &msg_len, unsigned int &msg_id);
+  bool readMessage(uint8_t *msg, unsigned int &msg_len, uint16_t &msg_id);
 
   /**
    * Send acknowledgement message to PC
@@ -58,14 +58,14 @@ public:
    * @param result Extra data to append to acknowledge message
    * @param result_len Length of extra data
    */
-  void acknowledge(unsigned int msg_id, uint8_t error_code, uint8_t *result, unsigned int result_len);
+  void acknowledge(uint16_t msg_id, uint8_t error_code, uint8_t *result, unsigned int result_len);
 
 private:
   HardwareSerial *serial;
-  uint8_t read_buf[MAX_MSG_LEN];
+  uint8_t read_buf[MAX_MSG_LEN + 2 + 2];  // MSG + 2 id + 2 CRC
   unsigned int read_buf_count;
   bool parse_started, parse_escaped;
-  unsigned int curr_msg_id;
+  uint16_t curr_msg_id;
 };
 
 
