@@ -1,9 +1,14 @@
 # SW8-Microcontrollers
 Microcontroller Code for Seawolf 8 Electronics
 
-Designed for MSP430 launchpad boards (currently G2ET w/ G2553 chip and FR2433 are supported). Can build with [Energia](https://energia.nu/).
+Designed for MSP430 Launchpad boards. Currently supported boards:
 
-Alternatively can use the [Arduino IDE](https://www.arduino.cc/en/software) using [this boards package](https://github.com/Andy4495/TI_Platform_Cores_For_Arduino)
+- MSP-EXP430G2ET w/ G2553
+- MSP-EXP430FR2433
+
+Use this Arduino core: [Arduino-Core-MSP430](https://github.com/MB3hel/Arduino-Core-MSP430)
+
+Official energia may work (though is abandoned at this point), but is known to have issues with various boards.
 
 
 ## Communication Protocol
@@ -23,7 +28,8 @@ There are multiple types of messages
 
 ## Commands & Queries
 
-TODO
+None yet
+
 
 ## Status messages
 
