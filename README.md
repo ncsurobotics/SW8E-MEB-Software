@@ -10,6 +10,7 @@ Alternatively can use the [Arduino IDE](https://www.arduino.cc/en/software) usin
 
 This is a clone of the [AUVControlBoard protocol](https://mb3hel.github.io/AUVControlBoard/user_guide/comm_protocol/), however the UART is fixed to a 57600 baud rate.
 
+Note that the max length of a message is also much shorter (16 bytes) because the MSP430G2553 has only 512 bytes of RAM.
 
 ## Messages
 

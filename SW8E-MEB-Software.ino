@@ -29,8 +29,11 @@
 /// Globals
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Comm object
+// Communication stuff
 Communication comm;
+uint8_t msg[MAX_MSG_LEN];
+unsigned int msg_len;
+uint16_t msg_id;
 
 // Sensor objects
 AHT10 aht10;
@@ -143,39 +146,33 @@ void task_read_sensors(){
 }
 
 void task_send_sensor_data(){
-  static uint8_t buf[MAX_MSG_LEN];
-
   // Send AHT10 data
-  buf[0] = 'T';
-  buf[1] = 'E';
-  buf[2] = 'M';
-  buf[3] = 'P';
-  Conversions::convertFloatToData(temp, &buf[4], true);
-  Conversions::convertFloatToData(humid, &buf[8], true);
-  comm.sendMessage(buf, 12);
+  msg[0] = 'T';
+  msg[1] = 'E';
+  msg[2] = 'M';
+  msg[3] = 'P';
+  Conversions::convertFloatToData(temp, &msg[4], true);
+  Conversions::convertFloatToData(humid, &msg[8], true);
+  comm.sendMessage(msg, 12);
 
   // Send leak status
-  buf[0] = 'L';
-  buf[1] = 'E';
-  buf[2] = 'A';
-  buf[3] = 'K';
-  buf[4] = leak_detected;
-  comm.sendMessage(buf, 5);
+  msg[0] = 'L';
+  msg[1] = 'E';
+  msg[2] = 'A';
+  msg[3] = 'K';
+  msg[4] = leak_detected;
+  comm.sendMessage(msg, 5);
 
   // Send arm / kill status (NET arm / kill)
-  buf[0] = 'T';
-  buf[1] = 'A';
-  buf[2] = 'R';
-  buf[3] = 'M';
-  buf[4] = !digitalRead(KILL_STAT);
-  comm.sendMessage(buf, 5);
+  msg[0] = 'T';
+  msg[1] = 'A';
+  msg[2] = 'R';
+  msg[3] = 'M';
+  msg[4] = !digitalRead(KILL_STAT);
+  comm.sendMessage(msg, 5);
 }
 
 void task_receive_pc(){
-  static uint8_t msg[MAX_MSG_LEN];
-  static uint16_t msg_id;
-  static unsigned int msg_len;
-
   // Helper macros for comparisons
   #define MSG_STARTS_WITH(x)      data_startswith(msg, msg_len, (x), sizeof((x)))
   #define MSG_EQUALS(x)           data_matches(msg, msg_len, (x), sizeof(x))

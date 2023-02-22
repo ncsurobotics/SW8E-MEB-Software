@@ -8,7 +8,7 @@
 
 #include <Arduino.h>
 
-#define MAX_MSG_LEN   64
+#define MAX_MSG_LEN   16
 
 // Acknowledge message error codes
 #define ACK_ERR_NONE                    0   // No error
