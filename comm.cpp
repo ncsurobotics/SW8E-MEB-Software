@@ -58,10 +58,8 @@ void Communication::sendMessage(uint8_t *msg, unsigned int len){
   serial->write(START_BYTE);
   
   // Write message id (big endian). Escape it as needed.
-  uint16_t msg_id = curr_msg_id;
-  curr_msg_id++;
   uint8_t id_buf[2];
-  Conversions::convertInt16ToData(msg_id, id_buf, false);
+  Conversions::convertInt16ToData(curr_msg_id++, id_buf, false);
   if(id_buf[0] == START_BYTE || id_buf[0] == END_BYTE || id_buf[0] == ESCAPE_BYTE)
       serial->write(ESCAPE_BYTE);
   serial->write(id_buf[0]);
@@ -138,8 +136,8 @@ bool Communication::readMessage(uint8_t *msg, unsigned int &msg_len, uint16_t &m
                 // Calculate CRC of read data. Exclude last two bytes.
                 // Last two bytes are the CRC (big endian) appended to the original data
                 // First two bytes are message ID. These are INCLUDED in CRC calc.
-                uint16_t calc_crc = crc16_ccitt_false(read_buf, read_buf_count - 2);
-                uint16_t read_crc = Conversions::convertDataToInt16(&read_buf[read_buf_count - 2], false);
+                uint16_t read_crc = crc16_ccitt_false(read_buf, read_buf_count - 2);
+                uint16_t calc_crc = Conversions::convertDataToInt16(&read_buf[read_buf_count - 2], false);
 
                 if(read_crc == calc_crc){
                     // This is a complete, valid message
@@ -175,17 +173,19 @@ bool Communication::readMessage(uint8_t *msg, unsigned int &msg_len, uint16_t &m
         read_buf_count = 0;
     }
   }
+  return false;
 }
 
 void Communication::acknowledge(uint16_t msg_id, uint8_t error_code, uint8_t *result, unsigned int result_len){
-  uint8_t *data = new uint8_t[6 + result_len];
-  data[0] = 'A';
-  data[1] = 'C';
-  data[2] = 'K';
-  Conversions::convertInt16ToData(msg_id, &data[3], false);
-  data[5] = error_code;
+  static uint8_t ack_buf[MAX_MSG_LEN];
+  ack_buf[0] = 'A';
+  ack_buf[1] = 'C';
+  ack_buf[2] = 'K';
+  Conversions::convertInt16ToData(msg_id, &ack_buf[3], false);
+  ack_buf[5] = error_code;
+  if(result_len > (MAX_MSG_LEN - 6))
+    result_len = MAX_MSG_LEN - 6;
   for(unsigned int i = 0; i < result_len; ++i)
-      data[6 + i] = result[i];
-  sendMessage(data, 6 + result_len);
-  delete data;
+      ack_buf[6 + i] = result[i];
+  sendMessage(ack_buf, 6 + result_len);
 }

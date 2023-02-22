@@ -53,4 +53,4 @@
 
 #endif
 
-#endif __PINMAP_H__
+#endif // __PINMAP_H__

@@ -57,7 +57,10 @@ bool over_temp_detected = false;
 /// Task functions
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void task_shutdown(){
+void task_shutdown(){   
+  // Serial.println("task_shutdown()"); Serial.flush();
+
+
   #define SDOWN_IND_BLINK     250     // Shutdown indicator blink rate (period in ms)
 
   static unsigned long shutdownLedBlink = millis();
@@ -82,6 +85,9 @@ void task_shutdown(){
 }
 
 void task_update_leds(){
+  // Serial.println("task_update_leds()"); Serial.flush();
+
+
   // When shutdown enabled the LEDs will blink
   // This is handled in the shutdown task
   if(shutdownEnable)
@@ -96,6 +102,9 @@ void task_update_leds(){
 }
 
 void task_read_sensors(){
+  // Serial.println("task_read_sensors()"); Serial.flush();
+
+
   // ----------------------------------------------------------------------------------------------
   // Read AHT10 temp sensor
   // ----------------------------------------------------------------------------------------------
@@ -146,6 +155,8 @@ void task_read_sensors(){
 }
 
 void task_send_sensor_data(){
+  // Serial.println("task_send_sensor_data()"); Serial.flush();
+
   // Send AHT10 data
   msg[0] = 'T';
   msg[1] = 'E';
@@ -173,10 +184,12 @@ void task_send_sensor_data(){
 }
 
 void task_receive_pc(){
+  // Serial.println("task_receive_pc()"); Serial.flush();
+
   // Helper macros for comparisons
   #define MSG_STARTS_WITH(x)      data_startswith(msg, msg_len, (x), sizeof((x)))
   #define MSG_EQUALS(x)           data_matches(msg, msg_len, (x), sizeof(x))
-
+  
   if(!comm.readMessage(msg, msg_len, msg_id)){
     // No message
     return;
