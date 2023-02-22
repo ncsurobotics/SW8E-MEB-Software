@@ -173,7 +173,7 @@ void task_send_sensor_data(){
 
 void task_receive_pc(){
   static uint8_t msg[MAX_MSG_LEN];
-  static uint16_t msg_id;
+  static unsigned int msg_id;
   static unsigned int msg_len;
 
   // Helper macros for comparisons

@@ -49,7 +49,7 @@ public:
    * @param msg_id Where to store id of received message (reference)
    * @return True if a message was received; else false. msg, msg_id, and msg_len are only assigned if true.
    */
-  bool readMessage(uint8_t *msg, unsigned int &msg_len, uint16_t &msg_id);
+  bool readMessage(uint8_t *msg, unsigned int &msg_len, unsigned int &msg_id);
 
   /**
    * Send acknowledgement message to PC

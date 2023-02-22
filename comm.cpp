@@ -177,7 +177,7 @@ bool Communication::readMessage(uint8_t *msg, unsigned int &msg_len, unsigned in
   }
 }
 
-void Communication::acknowledge(unsigned int msg_id, uint8_t error_code, uint8_t *result, unsigned int result_len){
+void Communication::acknowledge(uint16_t msg_id, uint8_t error_code, uint8_t *result, unsigned int result_len){
   uint8_t *data = new uint8_t[6 + result_len];
   data[0] = 'A';
   data[1] = 'C';
