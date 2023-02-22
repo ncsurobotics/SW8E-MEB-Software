@@ -96,7 +96,7 @@ void Communication::sendMessage(uint8_t *msg, unsigned int len){
   serial->flush();
 }
 
-bool Communication::readMessage(uint8_t *msg, unsigned int &msg_len, unsigned int &msg_id){
+bool Communication::readMessage(uint8_t *msg, unsigned int &msg_len, uint16_t &msg_id){
   // Read and handle a finite number of bytes
   unsigned int count = serial->available();
   uint8_t b;
