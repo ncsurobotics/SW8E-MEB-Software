@@ -60,17 +60,30 @@ bool over_temp_detected = false;
 void task_shutdown(){   
   // Serial.println("task_shutdown()"); Serial.flush();
 
-
-  #define SDOWN_IND_BLINK     250     // Shutdown indicator blink rate (period in ms)
-
-  static unsigned long shutdownLedBlink = millis();
-
   // Shutdown if one is scheduled
   if(shutdownEnable){
     if(millis() >= shutdownTime) {
       digitalWrite(SYS_POWER, LOW); // Actually shutdown
       while(1);
     }
+  }
+}
+
+void task_update_leds(){
+  #define SDOWN_IND_BLINK     250     // Shutdown indicator blink rate (period in ms)
+  static unsigned long shutdownLedBlink = millis();
+
+  // When shutdown enabled the LEDs will blink
+  // This is handled in the shutdown task
+  if(!shutdownEnable){
+    // Update LEDs (normal meanings)
+    digitalWrite(THRU_LED, !digitalRead(KILL_STAT));
+    if(leak_detected)
+      digitalWrite(LEAK_LED, HIGH);
+    if(over_temp_detected)
+      digitalWrite(TEMP_LED, HIGH);
+  }else{
+    // Blink LEDs indicating shutdown is going to occur
     if(millis() >= shutdownLedBlink){
       // Blink LEDs before shutdown
       int newState = !digitalRead(EXTRA_LED);
@@ -82,23 +95,6 @@ void task_shutdown(){
       digitalWrite(EXTRA_LED, newState);
     }
   }
-}
-
-void task_update_leds(){
-  // Serial.println("task_update_leds()"); Serial.flush();
-
-
-  // When shutdown enabled the LEDs will blink
-  // This is handled in the shutdown task
-  if(shutdownEnable)
-    return;
-
-  // Update LEDs
-  digitalWrite(THRU_LED, !digitalRead(KILL_STAT));
-  if(leak_detected)
-    digitalWrite(LEAK_LED, HIGH);
-  if(over_temp_detected)
-    digitalWrite(TEMP_LED, HIGH);
 }
 
 void task_read_sensors(){
