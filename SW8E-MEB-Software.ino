@@ -4,6 +4,7 @@
 #include "comm.hpp"
 #include "aht10.hpp"
 #include <Wire.h>
+#include "LEDs.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,6 +51,9 @@ float humid = 0.0f;
 bool leak_detected = false;
 bool over_temp_detected = false;
 
+// LED Strip
+LED_Strip ledStrip;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -72,29 +76,41 @@ void task_shutdown(){
 void task_update_leds(){
   #define SDOWN_IND_BLINK     250     // Shutdown indicator blink rate (period in ms)
   static unsigned long shutdownLedBlink = millis();
+  static bool shutdownBlinkOn = false;
 
   // When shutdown enabled the LEDs will blink
   // This is handled in the shutdown task
   if(!shutdownEnable){
     // Update LEDs (normal meanings)
-    digitalWrite(THRU_LED, !digitalRead(KILL_STAT));
+    // KILL_STAT line is low when thrusters have power (are net armed)
+    auto net_arm = (digitalRead(KILL_STAT) == LOW);
+    
+    if(net_arm)
+      ledStrip.set_One(1, YELLOW);
+    else
+      ledStrip.set_One(1, BLACK);
     if(leak_detected)
-      digitalWrite(LEAK_LED, HIGH);
-    if(over_temp_detected)
-      digitalWrite(TEMP_LED, HIGH);
+      ledStrip.set_One(7, RED);
+    else
+      ledStrip.set_One(7, BLACK);
   }else{
     // Blink LEDs indicating shutdown is going to occur
     if(millis() >= shutdownLedBlink){
-      // Blink LEDs before shutdown
-      int newState = !digitalRead(EXTRA_LED);
+      // Toggle LEDs
+      if(shutdownBlinkOn){
+        // Set all to red
+        ledStrip.set_All(RED);
+      }else{
+        // Set all to black
+        ledStrip.set_All(BLACK);
+      }
+      shutdownBlinkOn = !shutdownBlinkOn;
+
+      // Toggle again after SDOWN_IND_BLINK milliseconds
       shutdownLedBlink += SDOWN_IND_BLINK;
-      digitalWrite(SYS_LED, newState);
-      digitalWrite(TEMP_LED, newState);
-      digitalWrite(LEAK_LED, newState);
-      digitalWrite(THRU_LED, newState);
-      digitalWrite(EXTRA_LED, newState);
     }
   }
+  ledStrip.update_LEDs();
 }
 
 void task_read_sensors(){
@@ -261,19 +277,10 @@ void setup(){
   pinMode(SYS_POWER, OUTPUT);
   pinMode(KILL_STAT, INPUT);
   pinMode(LEAK_SEN, INPUT);
-  pinMode(RED_LED, OUTPUT);
-  pinMode(GRN_LED, OUTPUT);
-  pinMode(BLU_LED, OUTPUT);
-  pinMode(YLW_LED, OUTPUT);
-  pinMode(WHT_LED, OUTPUT);
+
 
   // Initial pin states
   digitalWrite(SYS_POWER, HIGH);      // Keep system on once code starts (no need to hold on button)
-  digitalWrite(SYS_LED, HIGH);        // Turn system power LED on once system boots
-  digitalWrite(TEMP_LED, LOW);        // Overtemp LED off by default
-  digitalWrite(LEAK_LED, LOW);        // Leak LED off by default
-  digitalWrite(THRU_LED, LOW);        // Thruster kill status LED off by default 
-  digitalWrite(EXTRA_LED, LOW);       // Currently unused white LED off by default
 
   // Setup I2C in master mode
   Wire.begin();
@@ -282,6 +289,26 @@ void setup(){
   if(!aht10.begin()){
     aht10Ec = AHT10_ERR_INIT;
   }
+
+  // Configure SPI
+  SPI.begin();
+  SPI.setBitOrder(MSBFIRST);              // Denotes the transmission precedence at Most Significant Bit First
+  SPI.setDataMode(SPI_MODE1);             // Sets the MSP430 into SPI Mode 1, which means the system is Idle when the CLK is low, and updates on the rising CLK Edge
+#if F_CPU==8000000L
+  SPI.setClockDivider(SPI_CLOCK_DIV2);    //Sets clock for SPI communication at 8/2=4Mhz
+#elif F_CPU==16000000L
+  SPI.setClockDivider(SPI_CLOCK_DIV4);    // 16MHz / 4 = 4MHz
+#else
+  #error Unknown clock division for this frequency!
+#endif
+  delay(10);
+  
+  // reset strip
+  ledStrip.reset_strip();                 // Resets the strip to all BLACK
+
+  // Set initial LED state
+  ledStrip.set_One(0, GREEN);
+  ledStrip.update_LEDs();
 }
 
 void loop(){
