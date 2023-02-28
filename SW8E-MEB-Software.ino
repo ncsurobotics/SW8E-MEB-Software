@@ -167,7 +167,6 @@ void task_read_sensors(){
 }
 
 void task_send_sensor_data(){
-  return;
   // Serial.println("task_send_sensor_data()"); Serial.flush();
 
   // Send AHT10 data
@@ -273,11 +272,8 @@ void setup(){
   // Conversions::checkBigEndian();
 
   // Setup communication with jetson
-  // comm.begin(Serial, PC_BAUD);
-  Serial.begin(57600);
-  Serial.println("STARTED!!!");
-
-  return;
+  comm.begin(Serial, PC_BAUD);
+  
 
   // Setup GPIO pins
   pinMode(SYS_POWER, OUTPUT);
@@ -311,7 +307,6 @@ void setup(){
   
   // reset strip
   ledStrip.reset_strip();                 // Resets the strip to all BLACK
-  delay(500);
 
   // Set initial LED state
   ledStrip.set_One(0, GREEN);
@@ -319,7 +314,6 @@ void setup(){
 }
 
 void loop(){
-  return;
   static unsigned curr_task = 0;
   
   // Check if the current task is ready to run. If so, run it
