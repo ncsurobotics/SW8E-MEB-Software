@@ -3,6 +3,7 @@
 #include "conversions.hpp"
 #include "comm.hpp"
 #include "aht10.hpp"
+#include "expboard.hpp"
 #include <Wire.h>
 
 
@@ -49,6 +50,8 @@ float temp = 0.0f;
 float humid = 0.0f;
 bool leak_detected = false;
 bool over_temp_detected = false;
+
+ExpansionBoard msb(MSB_ADDR);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -179,46 +182,23 @@ void task_send_sensor_data(){
   comm.sendMessage(msg, 5);
 }
 
-void task_receive_pc(){
-  // Serial.println("task_receive_pc()"); Serial.flush();
-
-  // Helper macros for comparisons
-  #define MSG_STARTS_WITH(x)      data_startswith(msg, msg_len, (x), sizeof((x)))
-  #define MSG_EQUALS(x)           data_matches(msg, msg_len, (x), sizeof(x))
-  
+void task_receive_pc(){ 
   if(!comm.readMessage(msg, msg_len, msg_id)){
     // No message
     return;
   }
 
   // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
-  /*
-  EXAMPLE MESSAGE HANDLING CODE
+  const uint8_t CMD_MSB_PREFIX[] = {'M', 'S', 'B'};
 
-  if(MSG_EQUALS(((uint8_t[]){'M', 'S', 'G', 'A'}))){
-    do_something();
+  if(data_startswith(msg, msg_len, CMD_MSB_PREFIX, sizeof(CMD_MSB_PREFIX))){
+    // 'M', 'S', 'B', [data]
+    // [data] is arbitrary sized data to be sent to mech systems board
+    msb.transfer(&msg[3], msg_len - 3, NULL, 0);
     comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
-  }else if(MSG_STARTS_WITH(((uint8_t[]){'M', 'S', 'G', 'B'}))){
-    // Validate length (right number of arguments)
-    if(msg_len != 8){
-      comm.acknowledge(msg_id, ACK_ERR_INVALID_ARGS, NULL, 0);
-      return;
-    }
-    
-    // Make sure this command's action is allowed (ie resources it requires are avaiable)
-    if(!required_sensor_available()){
-      comm.acknowledge(msg_id, ACK_ERR_INVALID_CMDS, NULL, 0);
-      return;
-    }
-    
-    // Get arguments
-    float arg = Conversions::convertDataToFloat(&msg[4], true);
-    
-    // Perform the requested action and acknowledge with no error
-    do_something_with_sensor(arg);
-    comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
+  }else{
+    comm.acknowledge(msg_id, ACK_ERR_UNKNOWN_MSG, NULL, 0);
   }
-  */
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
