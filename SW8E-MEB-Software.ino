@@ -154,6 +154,7 @@ void task_read_sensors(){
 }
 
 void task_send_sensor_data(){
+  return;
   // Serial.println("task_send_sensor_data()"); Serial.flush();
 
   // Send AHT10 data

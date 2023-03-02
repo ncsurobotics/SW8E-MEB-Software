@@ -39,7 +39,7 @@ public:
    * @param msg Message data to send
    * @param len Length of msg
    */
-  void sendMessage(uint8_t *msg, unsigned int len);
+  void sendMessage(const uint8_t *msg, unsigned int len);
 
   /**
    * Read a complete message from the PC

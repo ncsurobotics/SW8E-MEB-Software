@@ -139,6 +139,7 @@ def read_msg(ser: serial.Serial) -> Tuple[int, bytes]:
 
 def run(ser: serial.Serial):
     # NOTE: Edit this function to send / receive messages as desired
+    write_msg(ser, b'MSB\x01')
     while True:
         id, msg = read_msg(ser)
         print("Receive {}: {}".format(id, msg))

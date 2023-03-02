@@ -16,7 +16,7 @@
  * @param initial Initial value to use in calc. Useful for fragmented data sets. 65535 for "default"
  * @return uint16_t Calculated crc
  */
-static uint16_t crc16_ccitt_false_partial(uint8_t *data, unsigned int len, uint16_t initial){
+static uint16_t crc16_ccitt_false_partial(const uint8_t *data, unsigned int len, uint16_t initial){
     uint16_t crc = initial;
     int pos = 0;
     while(pos < len){
@@ -53,7 +53,7 @@ void Communication::end(){
     this->serial->end();
 }
 
-void Communication::sendMessage(uint8_t *msg, unsigned int len){
+void Communication::sendMessage(const uint8_t *msg, unsigned int len){
   // Write start byte
   serial->write(START_BYTE);
   
