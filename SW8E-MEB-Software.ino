@@ -7,6 +7,48 @@
 #include <Wire.h>
 
 
+// Don't try to enable LXFT1.
+// This oscillator isn't connected on these boards
+// and on the FR2433 cuases thrusters to arm during the 2 seconds
+// energia tries to do so.
+extern volatile uint16_t vlo_freq;
+void enableXtal(void)
+{
+#if (!defined(__MSP430FR2XX_4XX_FAMILY__) && (defined(__MSP430_HAS_CS__) || defined(__MSP430_HAS_CS_A__))) 
+    /* ACLK = VLO = ~ 12 KHz */
+    vlo_freq = 8000;
+    /* Source ACLK from VLO */
+    CSCTL2 |= SELA__VLOCLK;
+  }
+#endif
+#if (defined(__MSP430FR2XX_4XX_FAMILY__) && (defined(__MSP430_HAS_CS__) || defined(__MSP430_HAS_CS_A__)))
+  /* ACLK = REFO = ~ 32 KHz */
+  vlo_freq = 32768;
+  /* Source ACLK from REFO */
+  CSCTL4 |= SELA__REFOCLK;
+  CSCTL3 |= SELREF__REFOCLK;
+
+
+  /* Clear the Oscillator fault interrupt flag */
+  CSCTL7 &= ~(DCOFFG|XT1OFFG|FLLULIFG);
+  SFRIFG1 &= ~OFIFG;
+#endif
+
+#ifdef __MSP430_HAS_BC2__
+  /* ACLK = VLO = ~ 12 KHz */
+  vlo_freq = 12000;
+  /* No XTAL present. Default P2.6/7 to GPIO */
+  P2SEL &= ~(BIT6|BIT7);
+  /* Source ACLK from VLO */
+  BCSCTL3 |= LFXT1S_2;
+#endif
+
+#if defined(__MSP430_HAS_UCS__)
+  UCSCTL6 &= ~(XT1DRIVE_3);
+#endif
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Macros
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
