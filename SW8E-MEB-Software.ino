@@ -300,6 +300,7 @@ void setup(){
 
   // Setup I2C in master mode
   Wire.begin();
+  Wire.setClock(100000);              // For some reason, FR2433 defaults to 280kHz clock. Don't know why.
 
   // Start AHT10
   // if(!aht10.begin()){
