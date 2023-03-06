@@ -7,6 +7,7 @@
 #include <Wire.h>
 
 
+
 // Don't try to enable LXFT1.
 // This oscillator isn't connected on these boards
 // and on the FR2433 cuases thrusters to arm during the 2 seconds
@@ -196,7 +197,6 @@ void task_read_sensors(){
 }
 
 void task_send_sensor_data(){
-  return;
   // Serial.println("task_send_sensor_data()"); Serial.flush();
 
   // Send AHT10 data
@@ -302,9 +302,9 @@ void setup(){
   Wire.begin();
 
   // Start AHT10
-  if(!aht10.begin()){
+  // if(!aht10.begin()){
     aht10Ec = AHT10_ERR_INIT;
-  }
+  // }
 }
 
 void loop(){
