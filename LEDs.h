@@ -12,7 +12,7 @@
 #include <SPI.h>
 
 // Required defines for the code
-#define N_LEDS (4) // The number of LEDS in the strip
+#define N_LEDS (8) // The number of LEDS in the strip
 
 // COLORS = RRGGBB
 #define WHITE (0xFFFFFF)

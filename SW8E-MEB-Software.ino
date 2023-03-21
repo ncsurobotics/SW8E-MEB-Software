@@ -54,6 +54,9 @@ bool over_temp_detected = false;
 // LED Strip
 LED_Strip ledStrip;
 
+// System Status
+unsigned int soft_arm = false;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -85,14 +88,22 @@ void task_update_leds(){
     // KILL_STAT line is low when thrusters have power (are net armed)
     auto net_arm = (digitalRead(KILL_STAT) == LOW);
     
-    if(net_arm)
-      ledStrip.set_One(1, YELLOW);
-    else
-      ledStrip.set_One(1, BLACK);
-    if(leak_detected)
-      ledStrip.set_One(7, RED);
-    else
-      ledStrip.set_One(7, BLACK);
+    if(net_arm){
+      ledStrip.set_One(2, YELLOW);
+      ledStrip.set_One(3, YELLOW);
+    }
+    else{
+      ledStrip.set_One(2, BLACK);
+      ledStrip.set_One(3, BLACK);
+    }
+    if(soft_arm){
+      ledStrip.set_One(4, BLUE);
+      ledStrip.set_One(5, BLUE);
+    }
+    else{
+      ledStrip.set_One(4, BLACK);
+      ledStrip.set_One(5, BLACK);
+    }
   }else{
     // Blink LEDs indicating shutdown is going to occur
     if(millis() >= shutdownLedBlink){
@@ -206,6 +217,21 @@ void task_receive_pc(){
     // No message
     return;
   }
+  // Writes to the User Programmable LEDs using the communication
+  if(MSG_STARTS_WITH(((uint8_t[]){'L', 'E', 'D'}))){
+    if(msg_len != 6){
+      comm.acknowledge(msg_id, ACK_ERR_INVALID_ARGS, NULL, 0);
+      return;
+    }
+
+    uint32_t LED_msg = 0;
+    LED_msg |= msg[3] << 16; // red data
+    LED_msg |= msg[4] << 8; // green data
+    LED_msg |= msg[5]; // blue data
+
+    ledStrip.set_One(6, LED_msg);
+    ledStrip.set_One(7, LED_msg);
+  }
 
   // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
   /*
@@ -310,6 +336,7 @@ void setup(){
 
   // Set initial LED state
   ledStrip.set_One(0, GREEN);
+  ledStrip.set_One(1, GREEN);
   ledStrip.update_LEDs();
 }
 
