@@ -137,20 +137,20 @@ void task_update_leds(){
     auto net_arm = (digitalRead(KILL_STAT) == LOW);
     
     if(net_arm){
-      ledStrip.set_One(2, YELLOW);
-      ledStrip.set_One(3, YELLOW);
+      ledStrip.set_One(NET_ARM_LED, YELLOW);
+      ledStrip.set_One(NET_ARM_LED_ALT, YELLOW);
     }
     else{
-      ledStrip.set_One(2, BLACK);
-      ledStrip.set_One(3, BLACK);
+      ledStrip.set_One(NET_ARM_LED, BLACK);
+      ledStrip.set_One(NET_ARM_LED_ALT, BLACK);
     }
     if(soft_arm){
-      ledStrip.set_One(4, BLUE);
-      ledStrip.set_One(5, BLUE);
+      ledStrip.set_One(SOFTWARE_ARM_LED, BLUE);
+      ledStrip.set_One(SOFTWARE_ARM_LED_ALT, BLUE);
     }
     else{
-      ledStrip.set_One(4, BLACK);
-      ledStrip.set_One(5, BLACK);
+      ledStrip.set_One(SOFTWARE_ARM_LED, BLACK);
+      ledStrip.set_One(SOFTWARE_ARM_LED_ALT, BLACK);
     }
   }else{
     // Blink LEDs indicating shutdown is going to occur
@@ -260,7 +260,7 @@ void task_receive_pc(){
     return;
   }
   // Writes to the User Programmable LEDs using the communication
-  if(MSG_STARTS_WITH(((uint8_t[]){'L', 'E', 'D'}))){
+  /*if(MSG_STARTS_WITH(((uint8_t[]){'L', 'E', 'D'}))){
     if(msg_len != 6){
       comm.acknowledge(msg_id, ACK_ERR_INVALID_ARGS, NULL, 0);
       return;
@@ -271,9 +271,9 @@ void task_receive_pc(){
     LED_msg |= msg[4] << 8; // green data
     LED_msg |= msg[5]; // blue data
 
-    ledStrip.set_One(6, LED_msg);
-    ledStrip.set_One(7, LED_msg);
-  }
+    ledStrip.set_One(USER_PROGRAMMABLE_LED, LED_msg);
+    ledStrip.set_One(USER_PROGRAMMABLE_LED_ALT, LED_msg);
+  }8?
 
   // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
   const uint8_t CMD_MSB_PREFIX[] = {'M', 'S', 'B'};
@@ -364,8 +364,8 @@ void setup(){
   ledStrip.reset_strip();                 // Resets the strip to all BLACK
 
   // Set initial LED state
-  ledStrip.set_One(0, GREEN);
-  ledStrip.set_One(1, GREEN);
+  ledStrip.set_One(SYSTEM_ON_LED, GREEN);
+  ledStrip.set_One(SYSTEM_ON_LED_ALT, GREEN);
   ledStrip.update_LEDs();
 >>>>>>> 53c4b5b (Replaced old LEDs with neopixel code)
 }

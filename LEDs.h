@@ -23,6 +23,15 @@
 #define MAGENTA (0xFF005E)
 #define BLACK (0x000000) // Turns the LED OFF
 
+// LED purpose
+#define SYSTEM_ON_LED (0)
+#define SYSTEM_ON_LED_ALT (4)
+#define NET_ARM_LED (1)
+#define NET_ARM_LED_ALT (5)
+#define SOFTWARE_ARM_LED (2)
+#define SOFTWARE_ARM_LED_ALT (6)
+#define USER_PROGRAMMABLE_LED (3)
+#define USER_PROGRAMMABLE_LED (7)
 
 // LED Strip class that contains the LED value arrays as parameters and functions for writing and updating the LED Strip
 class LED_Strip{
