@@ -95,12 +95,10 @@ float humid = 0.0f;
 bool leak_detected = false;
 bool over_temp_detected = false;
 
-<<<<<<< HEAD
 ExpansionBoard msb(MSB_ADDR);
-=======
+
 // LED Strip
 LED_Strip ledStrip;
->>>>>>> 53c4b5b (Replaced old LEDs with neopixel code)
 
 // System Status
 unsigned int soft_arm = false;
@@ -273,7 +271,7 @@ void task_receive_pc(){
 
     ledStrip.set_One(USER_PROGRAMMABLE_LED, LED_msg);
     ledStrip.set_One(USER_PROGRAMMABLE_LED_ALT, LED_msg);
-  }8?
+  }*/
 
   // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
   const uint8_t CMD_MSB_PREFIX[] = {'M', 'S', 'B'};
@@ -342,10 +340,7 @@ void setup(){
   // Start AHT10
   // if(!aht10.begin()){
     aht10Ec = AHT10_ERR_INIT;
-<<<<<<< HEAD
   // }
-=======
-  }
 
   // Configure SPI
   SPI.begin();
@@ -367,7 +362,6 @@ void setup(){
   ledStrip.set_One(SYSTEM_ON_LED, GREEN);
   ledStrip.set_One(SYSTEM_ON_LED_ALT, GREEN);
   ledStrip.update_LEDs();
->>>>>>> 53c4b5b (Replaced old LEDs with neopixel code)
 }
 
 void loop(){
