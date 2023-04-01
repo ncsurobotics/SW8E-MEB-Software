@@ -25,13 +25,13 @@
 
 // LED purpose
 #define SYSTEM_ON_LED (0)
-#define SYSTEM_ON_LED_ALT (4)
+#define SYSTEM_ON_LED_ALT (7)
 #define NET_ARM_LED (1)
-#define NET_ARM_LED_ALT (5)
+#define NET_ARM_LED_ALT (6)
 #define SOFTWARE_ARM_LED (2)
-#define SOFTWARE_ARM_LED_ALT (6)
+#define SOFTWARE_ARM_LED_ALT (5)
 #define USER_PROGRAMMABLE_LED (3)
-#define USER_PROGRAMMABLE_LED (7)
+#define USER_PROGRAMMABLE_LED (4)
 
 // LED Strip class that contains the LED value arrays as parameters and functions for writing and updating the LED Strip
 class LED_Strip{
