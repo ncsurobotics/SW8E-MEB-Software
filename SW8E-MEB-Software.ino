@@ -257,8 +257,14 @@ void task_receive_pc(){
     // No message
     return;
   }
+
+
+  // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
+  const uint8_t CMD_MSB_PREFIX[] = {'M', 'S', 'B'};
+  const uint8_t CMD_LED_PREFIX[] = {'L', 'E', 'D'};
+
   // Writes to the User Programmable LEDs using the communication
-  /*if(MSG_STARTS_WITH(((uint8_t[]){'L', 'E', 'D'}))){
+  if(data_startswith(msg, msg_len, CMD_LED_PREFIX, sizeof(CMD_LED_PREFIX))){
     if(msg_len != 6){
       comm.acknowledge(msg_id, ACK_ERR_INVALID_ARGS, NULL, 0);
       return;
@@ -271,17 +277,14 @@ void task_receive_pc(){
 
     ledStrip.set_One(USER_PROGRAMMABLE_LED, LED_msg);
     ledStrip.set_One(USER_PROGRAMMABLE_LED_ALT, LED_msg);
-  }*/
-
-  // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
-  const uint8_t CMD_MSB_PREFIX[] = {'M', 'S', 'B'};
-
-  if(data_startswith(msg, msg_len, CMD_MSB_PREFIX, sizeof(CMD_MSB_PREFIX))){
+  }
+  else if(data_startswith(msg, msg_len, CMD_MSB_PREFIX, sizeof(CMD_MSB_PREFIX))){
     // 'M', 'S', 'B', [data]
     // [data] is arbitrary sized data to be sent to mech systems board
     msb.transfer(&msg[3], msg_len - 3, NULL, 0);
     comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
-  }else{
+  }
+  else{
     comm.acknowledge(msg_id, ACK_ERR_UNKNOWN_MSG, NULL, 0);
   }
 }
