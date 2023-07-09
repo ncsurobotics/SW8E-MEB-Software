@@ -250,6 +250,20 @@ void task_send_sensor_data(){
   msg[3] = 'M';
   msg[4] = !digitalRead(KILL_STAT);
   comm.sendMessage(msg, 5);
+
+  // Send system voltage information
+  msg[0] = 'V';
+  msg[1] = 'S';
+  msg[2] = 'Y';
+  msg[3] = 'S';
+  // Voltage divider: R1 = 1M, R2 = 220k
+  // Vin = (Vout * (R1+R2)) / R2
+  // Vout = (ADC_READ / 1024) * 3.3V     (ADC is 10-bit and VCC referenced)
+  const float scale_factor = ((1e6f + 220e3f) / 220e3f);  // (R1+R2)/R2
+  uint16_t read_val = analogRead(VSYS_DIV);
+  float calc_voltage = (((read_val / 1024.0f) * 3.3f) * scale_factor);
+  Conversions::convertFloatToData(calc_voltage, &msg[4], true);
+  comm.sendMessage(msg, 8);
 }
 
 void task_receive_pc(){ 
@@ -354,7 +368,7 @@ void setup(){
   #error Unknown clock division for this frequency!
 #endif
   delay(10);
-  
+
   // reset strip
   ledStrip.reset_strip();                 // Resets the strip to all BLACK
 

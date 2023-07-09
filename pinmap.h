@@ -9,6 +9,9 @@
 #define KILL_STAT   P2_3            // Input signal indicating thruster kill status
 #define LEAK_SEN    P1_0            // Leak sensor input
 
+#define VSYS_DIV    \
+    digitalPinToADCIn(P1_3)         // Voltage divider monitor for system voltage
+
 
 
 // Note: P1_5, P1_6, P1_7 reserved for SPI
@@ -24,6 +27,9 @@
 #define SYS_POWER   P2_1            // Keep high to maintain system power
 #define KILL_STAT   P2_0            // Input signal indicating thruster kill status
 #define LEAK_SEN    P1_0            // Leak sensor input
+
+#define VSYS_DIV    \
+    digitalPinToADCIn(P1_6)         // Voltage divider monitor for system voltage
 
 
 // Note: P2_5, P2_6, P2_4 reserved for SPI
