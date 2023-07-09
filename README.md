@@ -36,3 +36,4 @@ None yet
 - `AHT10[temp][humid]`: Data from AHT10 temperature and humidity sensor. Each of `[temp]` and `[humid]` are a 32-bit float (little endian).
 - `LEAK[status]`: Leak sensor status. `[status]` = 0 or 1 (1 = leak)
 - `TARM[status]`: Thruster arm status; `[status]` = 0 or 1 (1 = armed)
+- `VSYS[voltage]`: System voltage measurement (using voltage divider). `[voltage]` is a 32-bit float (little endian).
