@@ -254,7 +254,7 @@ void task_read_sensors(){
   // Only check for undervoltage if thrusters are killed. This ensures voltage drops from thrusters
   // will not trigger a shutdown.
   bool net_arm = (digitalRead(KILL_STAT) == LOW);
-  bool undervolt = (sys_voltage < TOO_LOW_VOLTAGE) && net_arm;
+  bool undervolt = (sys_voltage < TOO_LOW_VOLTAGE) && !net_arm;
   if(undervolt && !prevUndervolt){
     undervoltStart = millis();
   }else if(undervolt && prevUndervolt){
