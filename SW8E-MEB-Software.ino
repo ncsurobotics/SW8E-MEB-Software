@@ -58,7 +58,7 @@ void enableXtal(void)
 // Auto shutdown causes (comment out to disable shutdown for a specific cause)
 #define SHUTDOWN_NONE       0
 #define SHUTDOWN_LEAK       1
-// #define SHUTDOWN_TEMP    2
+#define SHUTDOWN_VOLTAGE    2
 
 // AHT10 error codes
 #define AHT10_ERR_NONE      0
@@ -93,7 +93,7 @@ unsigned int shutdownCause = 0;
 float temp = 0.0f;
 float humid = 0.0f;
 bool leak_detected = false;
-bool over_temp_detected = false;
+float sys_voltage = 0.0f;
 
 ExpansionBoard msb(MSB_ADDR);
 
@@ -155,8 +155,14 @@ void task_update_leds(){
     if(millis() >= shutdownLedBlink){
       // Toggle LEDs
       if(shutdownBlinkOn){
-        // Set all to red
-        ledStrip.set_All(RED);
+        // Set all to the correct color
+        if(shutdownCause == SHUTDOWN_LEAK){
+          ledStrip.set_All(RED);
+        }else if(shutdownCause == SHUTDOWN_VOLTAGE){
+          ledStrip.set_All(YELLOW);
+        }else{
+          ledStrip.set_All(WHITE);
+        }
       }else{
         // Set all to black
         ledStrip.set_All(BLACK);
@@ -181,15 +187,12 @@ void task_read_sensors(){
   #define OVER_TEMP           40                    // Over temp threshold degrees C
 
   if(aht10Ec == AHT10_ERR_NONE && aht10.read(&temp, &humid)){
-    #if defined(SHUTDOWN_TEMP)
-      if(!shutdownEnable && temp > OVER_TEMP){
-        shutdownTime = millis() + TEMP_SHUTDOWN_TIME;
-        shutdownEnable = true;
-        shutdownCause = SHUTDOWN_TEMP;
-      }    
-    #else
-      over_temp_detected = true;
-    #endif
+    // Uncomment to enable over-temperature shutdown
+    /*if(!shutdownEnable && temp > OVER_TEMP){
+      shutdownTime = millis() + TEMP_SHUTDOWN_TIME;
+      shutdownEnable = true;
+      shutdownCause = SHUTDOWN_TEMP;
+    }*/ 
   }
   // ----------------------------------------------------------------------------------------------
 
@@ -220,6 +223,17 @@ void task_read_sensors(){
     #endif
   }
   prevLeak = leak;
+  // ----------------------------------------------------------------------------------------------
+
+  // ----------------------------------------------------------------------------------------------
+  // System Voltage (using voltage divider)
+  // ----------------------------------------------------------------------------------------------
+  // Voltage divider: R1 = 1M, R2 = 220k
+  // Vin = (Vout * (R1+R2)) / R2
+  // Vout = (ADC_READ / 1024) * 3.3V     (ADC is 10-bit and VCC referenced)
+  const float scale_factor = ((1e6f + 220e3f) / 220e3f);  // (R1+R2)/R2
+  uint16_t read_val = analogRead(VSYS_DIV);
+  sys_voltage = (((read_val / 1024.0f) * 3.3f) * scale_factor);
   // ----------------------------------------------------------------------------------------------
 }
 
@@ -256,13 +270,7 @@ void task_send_sensor_data(){
   msg[1] = 'S';
   msg[2] = 'Y';
   msg[3] = 'S';
-  // Voltage divider: R1 = 1M, R2 = 220k
-  // Vin = (Vout * (R1+R2)) / R2
-  // Vout = (ADC_READ / 1024) * 3.3V     (ADC is 10-bit and VCC referenced)
-  const float scale_factor = ((1e6f + 220e3f) / 220e3f);  // (R1+R2)/R2
-  uint16_t read_val = analogRead(VSYS_DIV);
-  float calc_voltage = (((read_val / 1024.0f) * 3.3f) * scale_factor);
-  Conversions::convertFloatToData(calc_voltage, &msg[4], true);
+  Conversions::convertFloatToData(sys_voltage, &msg[4], true);
   comm.sendMessage(msg, 8);
 }
 
