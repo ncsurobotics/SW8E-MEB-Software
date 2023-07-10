@@ -37,3 +37,4 @@ None yet
 - `LEAK[status]`: Leak sensor status. `[status]` = 0 or 1 (1 = leak)
 - `TARM[status]`: Thruster arm status; `[status]` = 0 or 1 (1 = armed)
 - `VSYS[voltage]`: System voltage measurement (using voltage divider). `[voltage]` is a 32-bit float (little endian).
+- `SDOWN[cause]`: System is shutting down. `[cause]` is an unsigned 8-bit integer indicating the cause.

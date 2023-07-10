@@ -92,16 +92,13 @@ unsigned int shutdownCause = 0;
 // Sensor data
 float temp = 0.0f;
 float humid = 0.0f;
-bool leak_detected = false;
 float sys_voltage = 0.0f;
+bool leak_detected = false;
 
 ExpansionBoard msb(MSB_ADDR);
 
 // LED Strip
 LED_Strip ledStrip;
-
-// System Status
-unsigned int soft_arm = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,6 +106,16 @@ unsigned int soft_arm = false;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// Task functions
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void notify_pc_shutdown(){
+  msg[0] = 'S';
+  msg[1] = 'D';
+  msg[2] = 'O';
+  msg[3] = 'W';
+  msg[4] = 'N';
+  msg[5] = shutdownCause;
+  comm.sendMessage(msg, 6);
+}
 
 void task_shutdown(){   
   // Serial.println("task_shutdown()"); Serial.flush();
@@ -142,7 +149,8 @@ void task_update_leds(){
       ledStrip.set_One(NET_ARM_LED, BLACK);
       ledStrip.set_One(NET_ARM_LED_ALT, BLACK);
     }
-    if(soft_arm){
+    if(/*soft_arm*/ false){
+      // NOTE: This is not detectable on current MEB hardware. Can implement in future revision of MEB
       ledStrip.set_One(SOFTWARE_ARM_LED, BLUE);
       ledStrip.set_One(SOFTWARE_ARM_LED_ALT, BLUE);
     }
@@ -211,16 +219,17 @@ void task_read_sensors(){
     // Leak just now detected
     leakStart = millis();
   }else if(leak && prevLeak){
-    #ifdef SHUTDOWN_LEAK
-      // Leak has been detected. If long enough, trigger shutdown (unless it has already been triggered)
-      if(!shutdownEnable && millis() - leakStart > LEAK_DETECT_TIME){
-        shutdownTime = millis() + LEAK_SHUTDOWN_TIME;
-        shutdownEnable = true;
-        shutdownCause = SHUTDOWN_LEAK;
-      }
-    #else
+    // Leak has been detected. If long enough, trigger shutdown (unless it has already been triggered)
+    if(!shutdownEnable && millis() - leakStart > LEAK_DETECT_TIME){
+      // -----------------------------------------------------------------------
+      // Comment to disable shutdown due to leak
+      shutdownTime = millis() + LEAK_SHUTDOWN_TIME;
+      shutdownEnable = true;
+      shutdownCause = SHUTDOWN_LEAK;
+      notify_pc_shutdown();
+      // -----------------------------------------------------------------------
       leak_detected = true;
-    #endif
+    }
   }
   prevLeak = leak;
   // ----------------------------------------------------------------------------------------------
@@ -228,12 +237,38 @@ void task_read_sensors(){
   // ----------------------------------------------------------------------------------------------
   // System Voltage (using voltage divider)
   // ----------------------------------------------------------------------------------------------
+  #define UVOLT_DETECT_TIME     8000                // How long undervoltage must be for (in ms) to trigger shutdown
+  #define UVOLT_SHUTDOWN_TIME   10000               // How long to delay shutdown after undervoltage detected (in ms)
+  #define TOO_LOW_VOLTAGE       13.5f
+
+  static unsigned long undervoltStart = 0;          // When undervoltage detected
+  static bool prevUndervolt = false;                // Was undervoltage on last iteration
+
   // Voltage divider: R1 = 1M, R2 = 220k
   // Vin = (Vout * (R1+R2)) / R2
   // Vout = (ADC_READ / 1024) * 3.3V     (ADC is 10-bit and VCC referenced)
   const float scale_factor = ((1e6f + 220e3f) / 220e3f);  // (R1+R2)/R2
   uint16_t read_val = analogRead(VSYS_DIV);
   sys_voltage = (((read_val / 1024.0f) * 3.3f) * scale_factor);
+  
+  // Only check for undervoltage if thrusters are killed. This ensures voltage drops from thrusters
+  // will not trigger a shutdown.
+  bool net_arm = (digitalRead(KILL_STAT) == LOW);
+  bool undervolt = (sys_voltage < TOO_LOW_VOLTAGE) && net_arm;
+  if(undervolt && !prevUndervolt){
+    undervoltStart = millis();
+  }else if(undervolt && prevUndervolt){
+    if(!shutdownEnable && millis() - undervoltStart > UVOLT_DETECT_TIME){
+      // -----------------------------------------------------------------------
+      // Comment to disable shutdown due to undervotlage
+      shutdownTime = millis() + UVOLT_SHUTDOWN_TIME;
+      shutdownEnable = true;
+      shutdownCause = SHUTDOWN_VOLTAGE;
+      notify_pc_shutdown();
+      // -----------------------------------------------------------------------
+    }
+  }
+  prevUndervolt = undervolt;
   // ----------------------------------------------------------------------------------------------
 }
 
@@ -350,7 +385,6 @@ void setup(){
   pinMode(SYS_POWER, OUTPUT);
   pinMode(KILL_STAT, INPUT);
   pinMode(LEAK_SEN, INPUT);
-
 
   // Initial pin states
   digitalWrite(SYS_POWER, HIGH);      // Keep system on once code starts (no need to hold on button)
