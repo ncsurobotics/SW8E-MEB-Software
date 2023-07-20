@@ -261,10 +261,10 @@ void task_read_sensors(){
     if(!shutdownEnable && millis() - undervoltStart > UVOLT_DETECT_TIME){
       // -----------------------------------------------------------------------
       // Comment to disable shutdown due to undervotlage
-      shutdownTime = millis() + UVOLT_SHUTDOWN_TIME;
-      shutdownEnable = true;
-      shutdownCause = SHUTDOWN_VOLTAGE;
-      notify_pc_shutdown();
+      // shutdownTime = millis() + UVOLT_SHUTDOWN_TIME;
+      // shutdownEnable = true;
+      // shutdownCause = SHUTDOWN_VOLTAGE;
+      // notify_pc_shutdown();
       // -----------------------------------------------------------------------
     }
   }
