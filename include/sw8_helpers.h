@@ -3,6 +3,4 @@
 
 typedef enum bool_t {FALSE, TRUE};
 
-
-
 #endif
