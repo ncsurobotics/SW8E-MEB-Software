@@ -145,7 +145,7 @@ tasks: Tasks {
     turn_off_shutdown_blink -> check_scheduled_shutdown
     check_scheduled_shutdown -> save_thrust_state: If no shutdown scheduled
     save_thrust_state -> set_strip_netarm: If the system is fully armed  
-    save_thrust_state -> set_strip_!netarm: If the system is not fully armed
+    save_thrust_state -> set_strip_!netarm: task_recIf the system is not fully armed
     set_strip_netarm -> check_softarm
     set_strip_!netarm -> check_softarm
     check_softarm -> set_strip_softarm: If software armed
@@ -163,6 +163,16 @@ tasks: Tasks {
     strip_shutdown_unknown -> set_toggle_timer
     strip_shutdown_toggle -> set_toggle_timer
     set_toggle_timer -> update_led
+  }
+
+  task_receive_pc: Receive and Acknowledge Message {
+    check_if_message_received: Check if message has been recieved
+    acknowledge_message_from_MSB: Acknowledge message from MSB
+    acknowledge_unknown_message: Acknowledge message not from MSB
+
+    check_if_message_received-> acknowledge_message_from_MSB: If message received from MSB
+    check_if_message_received-> acknowledge_unknown_message: If message recieved from elsewhere
+
   }
 }
 
