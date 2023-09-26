@@ -6,6 +6,8 @@
  * @section DESCRIPTION
  *
  */
+ 
+#include <stdint.h>
 
 #ifndef LEDS_H
 #define LEDS_H

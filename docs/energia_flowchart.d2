@@ -1,0 +1,168 @@
+setup: Setup {
+  comp_comm_setup: Set Jetson Comms
+  gpio_setup: Set up GPIO {
+    mode_setup: Set pin directions
+    state_setup: Set initial pin state
+
+    mode_setup -> state_setup
+  }
+  i2c_comm_setup: Setup the I2C bus in controller mode
+  temp_setup: Start up the temperature sensor
+  spi_comm_setup: Setup the SPI bus
+  led_setup: Set up the LED strip {
+    reset_strip: Reset LED strip
+    init_pwr_led: Turn on the power LED (GREEN)
+
+    reset_strip -> init_pwr_led
+  }
+
+  comp_comm_setup -> gpio_setup
+  gpio_setup -> i2c_comm_setup
+  i2c_comm_setup -> temp_setup
+  temp_setup -> spi_comm_setup
+  spi_comm_setup -> led_setup
+}
+
+loop: Main Loop {
+  check_curr_task: Check whether the current task is ready to run {
+    rec_time: Record time of last run as the current time
+    run_target: Execute the target function
+
+    rec_time -> run_target
+  }
+  inc_task_counter: Increment the task counter to the next task
+
+  check_curr_task -> check_curr_task.rec_time: If ready to run
+  check_curr_task -> inc_task_counter: If not ready to run
+}
+
+setup -> loop
+
+tasks: Tasks {
+  task_read_sensors: Read Sensors {
+    read_temp: Check if temperature is over safe threshold
+    init_shutdown: Initiate Shutdown
+
+    init_leak_timer: Initiate time for reading the leak sensor
+    check_leak: Check rising edge of leak sensor signal
+
+    set_leak_start: Set leak start to current time
+    check_existant_leak: Check if a leak is in progress
+    check_leak_duration: Check the duration the leak has been going on for
+
+    set_undervolt_time: Initialize undervoltage time
+    read_voltage: Read the system voltage
+    check_thrust_state: Check whether the thrusters are armed
+
+    begin_undervolt_time: Set the beginning of the undervoltage record to current time
+    check_undervolt_duration: Check how long undervoltage state has been active
+
+    read_temp -> init_shutdown: If temp unsafe
+    init_leak_timer -> check_existant_leak
+    check_leak -> set_leak_start: If a leak has started
+    check_existant_leak -> check_leak: If no leak in progress
+    check_existant_leak -> check_leak_duration: If leak is in progress
+    check_leak_duration -> init_shutdown: If leak has gone on for greater than a certain period of time
+    set_undervolt_time -> read_voltage
+    read_voltage -> check_thrust_state
+    read_voltage -> begin_undervolt_time
+    check_thrust_state -> begin_undervolt_time
+    begin_undervolt_time -> check_undervolt_duration
+    check_undervolt_duration -> init_shutdown: If system has been undervoltage for longer than a certain amount of time
+    set_leak_start -> begin_undervolt_time
+
+    read_temp -> init_leak_timer: If temp safe
+    check_leak -> set_undervolt_time: If no leak
+  }
+
+  task_send_sensors: Send Sensor Data {
+    add_temp_to_msg: Add 'TEMP' to message array
+    append_temp_data: Append the temperature data to the msg array
+    append_humid_data: Append the humidity data to the msg array
+
+    send_to_jetson: Send the message to the Jetson
+
+    add_leak_to_msg: Add 'LEAK' to msg array
+    append_leak_stat: Append the leak status to the msg array
+
+    add_tarm_to_msg: Add 'TARM' (Thruster Arm) to msg array
+    append_kill_stat: Append the arm status of the thrusters to the msg array
+
+    add_vsys_to_msg: Add 'VSYS' to msg array
+    append_sys_volt: Append the system voltage to the msg array
+
+    append_humid_data -> send_to_jetson
+    append_leak_stat -> send_to_jetson
+    append_kill_stat -> send_to_jetson
+    append_sys_volt -> send_to_jetson
+
+    add_temp_to_msg -> append_temp_data
+    append_temp_data -> append_humid_data
+
+    add_leak_to_msg -> append_leak_stat
+
+    add_vsys_to_msg -> append_sys_volt
+
+    add_tarm_to_msg -> append_kill_stat
+  }
+
+  task_shutdown: Shutdown {
+    check_shutdown_en: Check if a shutdown is scheduled
+    shutdown_time: Check shutdown timer
+    write_syspwr_low: Hold system power pin low
+    wait: Wait until the system loses power    
+
+    check_shutdown_en -> shutdown_time: Shutdown is scheduled
+    shutdown_time -> shutdown_time: Shutdown time has not expired
+    shutdown_time -> write_syspwr_low: Shutdown time expired
+    write_syspwr_low -> wait
+  }
+
+  task_update_leds: Update LEDs {
+    get_current_millis: Get the current time in ms
+    turn_off_shutdown_blink: Turn off shutdown blink
+    check_scheduled_shutdown: Check if there is a scheduled shutdown
+    
+    save_thrust_state: Save the thruster state
+
+    set_strip_netarm: Set the strip to show Yellow lights for the Net Arm LEDs
+    set_strip_!netarm: Turn off Net Arm LEDs
+
+    check_softarm: Check soft arm state
+    set_strip_softarm: Set the strip to show Blue lights for the Soft Arm LEDs
+    set_strip_!softarm: Turn off Soft Arm LEDs
+
+    check_toggle_timer: Check whether the LEDs are ready to toggle
+    strip_shutdown_leak: Turn LEDs Red to indicate leak caused shutdown
+    strip_shutdown_volt: Turn LEDs Yellow to indicate voltage caused shutdown
+    strip_shutdown_unknown: Turn LEDs white to indicate unknown cause of shutdown
+    strip_shutdown_toggle: Toggle LEDs off
+    set_toggle_timer: Set the timer for the next toggle
+
+    update_led: Update the LED strip
+
+    get_current_millis -> turn_off_shutdown_blink
+    turn_off_shutdown_blink -> check_scheduled_shutdown
+    check_scheduled_shutdown -> save_thrust_state: If no shutdown scheduled
+    save_thrust_state -> set_strip_netarm: If the system is fully armed  
+    save_thrust_state -> set_strip_!netarm: If the system is not fully armed
+    set_strip_netarm -> check_softarm
+    set_strip_!netarm -> check_softarm
+    check_softarm -> set_strip_softarm: If software armed
+    check_softarm -> set_strip_!softarm: If not software armed
+    set_strip_softarm -> update_led
+    set_strip_!softarm -> update_led
+
+    check_scheduled_shutdown -> check_toggle_timer: If shutdown scheduled
+    check_toggle_timer -> strip_shutdown_leak: If the shutdown is caused by a leak
+    check_toggle_timer -> strip_shutdown_volt: If the shutdown is caused by a low voltage
+    check_toggle_timer -> strip_shutdown_unknown: If the shutdown has an unknown cause
+    check_toggle_timer -> strip_shutdown_toggle: If the timer indicates the strip should toggle off
+    strip_shutdown_leak -> set_toggle_timer
+    strip_shutdown_volt -> set_toggle_timer
+    strip_shutdown_unknown -> set_toggle_timer
+    strip_shutdown_toggle -> set_toggle_timer
+    set_toggle_timer -> update_led
+  }
+}
+
