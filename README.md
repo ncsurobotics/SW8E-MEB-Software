@@ -1,4 +1,5 @@
 # SW8-Microcontrollers
+
 Microcontroller Code for Seawolf 8 Electronics
 
 Designed for MSP430 Launchpad boards. Currently supported boards:
@@ -9,7 +10,6 @@ Designed for MSP430 Launchpad boards. Currently supported boards:
 Use this Arduino core: [Arduino-Core-MSP430](https://github.com/MB3hel/Arduino-Core-MSP430)
 
 Official energia may work (though is abandoned at this point), but is known to have issues with various boards.
-
 
 ## Communication Protocol
 
@@ -25,15 +25,15 @@ There are multiple types of messages
 - Acknowledgements: Response to commands. May contain data. Follow same format as [AUVControlBoard acknowledgements](https://mb3hel.github.io/AUVControlBoard/user_guide/messages/#acknowledgements)
 - Status Messages: Sent from MEB to computer. Contain unrequested information.
 
-
 ## Commands & Queries
 
 None yet
 
-
 ## Status messages
 
-- `AHT10[temp][humid]`: Data from AHT10 temperature and humidity sensor. Each of `[temp]` and `[humid]` are a 32-bit float (little endian).
+*Note that these status messages are all send periodically, EXCEPT the SDOWN message, which is send only if the system is about to shut down.*
+
+- `TEMP[temp][humid]`: Data from temperature and humidity sensor. Each of `[temp]` and `[humid]` are a 32-bit float (little endian).
 - `LEAK[status]`: Leak sensor status. `[status]` = 0 or 1 (1 = leak)
 - `TARM[status]`: Thruster arm status; `[status]` = 0 or 1 (1 = armed)
 - `VSYS[voltage]`: System voltage measurement (using voltage divider). `[voltage]` is a 32-bit float (little endian).
