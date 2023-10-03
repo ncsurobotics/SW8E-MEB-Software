@@ -1,0 +1,36 @@
+args_set_one: Set One - Arguments {
+	led: led (int)
+	value: value (uint32_t)
+}
+fnc_set_one: Set One {
+	bounds_chk: Check that assignment is a valid LED
+	assign_red: Insert RED value
+	assign_grn: Insert GREEN value
+	assign_blu: Insert BLUE value
+	return: Return
+
+	bounds_chk -> return: LED is an invalid LED
+	bounds_chk -> assign_red: LED is a valid LED
+	assign_red -> assign_grn
+	assign_grn -> assign_blu
+	assign_blu -> return
+}
+args_set_one.led -> fnc_set_one.bounds_chk
+args_set_one.value -> fnc_set_one.assign_red
+args_set_one.value -> fnc_set_one.assign_grn
+args_set_one.value -> fnc_set_one.assign_blu
+
+args_set_all: Set All - Arguments {
+	value: value (uint32_t)
+}
+fnc_set_all: Set All {
+	loop_con_chk: Check if number of loop iterations is lower than maximum number of LEDs
+	call: Call set_One
+	return: Return
+
+	loop_con_chk -> return: If not assigning to a valid LED
+	loop_con_chk -> call: If still assigning to a valid LED
+}
+args_set_all.value -> fnc_set_all.call
+fnc_set_all.call -> fnc_set_one
+fnc_set_one -> fnc_set_all.loop_con_chk
