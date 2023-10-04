@@ -34,3 +34,28 @@ fnc_set_all: Set All {
 args_set_all.value -> fnc_set_all.call
 fnc_set_all.call -> fnc_set_one
 fnc_set_one -> fnc_set_all.loop_con_chk
+
+args_write_LED: Write LED - Arguments {
+	r_value: r (uint8_t)
+	g_value: g (uint8_t)
+	b_value: b (uint8_t)
+}
+
+fnc_write_LED: Write LED {
+	split_g_r_b_channels: Write g,r, and b bits to a single string
+	check_if_1: Check if individual bit is a 1
+	send_1_code: Send code for "1" with SPI
+	send_0_code: Send code for "0" with SPI
+	goto_next_bit: Go to next bit in string
+
+	split_g_r_b_channels -> check_if_1
+	check_if_1 -> send_1_code: If bit is "1"
+	check_if_1 -> send_0_code: If bit is "0"
+	send_1_code -> goto_next_bit
+	send_0_code -> goto_next_bit
+	goto_next_bit -> check_if_1: If remaining bits
+}
+
+args_write_LED.r_value -> fnc_write_LED.split_g_r_b_channels
+args_write_LED.g_value -> fnc_write_LED.split_g_r_b_channels
+args_write_LED.b_value -> fnc_write_LED.split_g_r_b_channels
