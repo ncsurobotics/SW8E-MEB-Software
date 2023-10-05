@@ -1,3 +1,9 @@
+vars_global: Global Variables {
+	red: Red Array
+	blue: Blue Array
+	green: Green Array
+}
+
 args_set_one: Set One - Arguments {
 	led: led (int)
 	value: value (uint32_t)
@@ -59,3 +65,21 @@ fnc_write_LED: Write LED {
 args_write_LED.r_value -> fnc_write_LED.split_g_r_b_channels
 args_write_LED.g_value -> fnc_write_LED.split_g_r_b_channels
 args_write_LED.b_value -> fnc_write_LED.split_g_r_b_channels
+
+fnc_update_LEDs: Update LEDs {
+	call_write_led: Call write_LED
+	delay: Delay
+	call_write_led -> delay
+	delay -> call_write_led
+}
+
+vars_global.red -> fnc_update_LEDS.call_write_led
+vars_global.green -> fnc_update_LEDS.call_write_led
+vars_global.blue -> fnc_update_LEDS.call_write_led
+
+fnc_reset_strip: Reset Strip {
+	call_write_led: Write 0's to write_LED
+	delay: Delay
+	call_write_led -> delay
+	delay -> call_write_led
+}
