@@ -38,15 +38,13 @@ fnc_set_all: Set All {
 	loop_con_chk -> call: If still assigning to a valid LED
 }
 args_set_all.value -> fnc_set_all.call
-fnc_set_all.call -> fnc_set_one
-fnc_set_one -> fnc_set_all.loop_con_chk
+fnc_set_all.call <-> fnc_set_one
 
 args_write_LED: Write LED - Arguments {
 	r_value: r (uint8_t)
 	g_value: g (uint8_t)
 	b_value: b (uint8_t)
 }
-
 fnc_write_LED: Write LED {
 	split_g_r_b_channels: Write g,r, and b bits to a single string
 	check_if_1: Check if individual bit is a 1
@@ -61,7 +59,6 @@ fnc_write_LED: Write LED {
 	send_0_code -> goto_next_bit
 	goto_next_bit -> check_if_1: If remaining bits
 }
-
 args_write_LED.r_value -> fnc_write_LED.split_g_r_b_channels
 args_write_LED.g_value -> fnc_write_LED.split_g_r_b_channels
 args_write_LED.b_value -> fnc_write_LED.split_g_r_b_channels
@@ -72,6 +69,7 @@ fnc_update_LEDs: Update LEDs {
 	call_write_led -> delay
 	delay -> call_write_led
 }
+fnc_update_LEDs.call_write_led <-> fnc_write_LED
 
 vars_global.red -> fnc_update_LEDS.call_write_led
 vars_global.green -> fnc_update_LEDS.call_write_led
