@@ -1,0 +1,56 @@
+args_begin: args_begin {
+    serial: Serial
+    baud: baud
+}
+
+begin: Begin {
+    store_serial_port: Store address of serial port
+    check_serial_null: Check if serial address is null
+    return: Stop function execution
+    zero_read_buf_count: Set read buffer count to zero
+    set_parse_started_false: Set parse started to false
+    set_parse_escaped_false: Set parse escaped false
+    call_hardware_serial_begin_function: Begin serial communication
+
+    store_serial_port -> check_serial_null
+    check_serial_null -> return :If serial null
+    check_serial_null -> zero_read_buf_count
+    zero_read_buf_count -> set_parse_started_false
+    set_parse_started_false -> set_parse_escaped_false
+    set_parse_escaped_false -> call_hardware_serial_begin_function
+}
+
+args_begin -> begin
+
+args_send_message: Send Message Arguments {
+
+}
+
+readMessage: Read Message {
+    check_num_bytes_in_buffer: Check number of bytes in buffer
+    get_next_byte: Get next byte
+    check_msg_too_long: Check if message is too long
+    
+    clear_buffer: Clear buffer
+    get_crc_bits: Get CRC bits
+    calculate_crc: Calculate CRC
+    compare_crc_values: Compare msg and calculated crc bits
+    msg_successfully_read: Indicate message successfully read
+    handle_escape_byte: Handle escape byte
+
+    check_num_bytes_in_buffer -> get_next_byte
+    get_next_byte -> check_msg_too_long
+    check_msg_too_long -> clear_buffer: If bit is start byte
+    check_msg_too_long -> get_crc_bits: If bit is end bit
+    get_crc_bits -> calculate_crc
+    calculate_crc -> compare_crc_values
+    compare_crc_values -> msg_successfully_read: If CRC values are the same
+
+    check_msg_too_long -> handle_escape_byte: If byte is escape byte
+    
+
+}
+
+acknowledge: Acknowledge {
+
+}
