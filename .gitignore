@@ -53,6 +53,7 @@ dkms.conf
 
 # IDE Specific
 /.idea/
+/.vscode/
 
 # cmake
 cmake-build-debug/
