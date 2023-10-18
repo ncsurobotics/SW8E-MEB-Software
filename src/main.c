@@ -11,12 +11,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-int main(){
-    
+int main() {
     //---------------
     // Main Loop
     //---------------
     
+    // This general structure is lifted directly from MB3hel's AHT10 driver (github.com/MB3hel/AHT10Driver)
     while(true) {
         if (CHECK_FLAG(TIMING_10MS)) {
             CLEAR_FLAG(TIMING_100MS);
@@ -35,7 +35,7 @@ int main(){
             // Run ever 1sec
             
         } else {
-            // No flags set. Enter LPM0. Interrupts will exitLPM0 when flag set
+            // No flags set. Enter LPM0. Interrupts will exit LPM0 when flag set
             LPM0;
         }
     }
