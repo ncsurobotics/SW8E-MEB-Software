@@ -13,7 +13,7 @@
  
 
 // Leak Detection (P1.5)
-SET_PIN_SEL(LEAK_DETECT_PORT, LEAK_DETECT_PIN, 0);
+PIN_SET_SEL(LEAK_DETECT_PORT, LEAK_DETECT_PIN, 0);
  
 // LED Strip Data line (Px.x)
  

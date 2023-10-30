@@ -13,17 +13,21 @@
 
 #pragma region 
 // Macros for making pins *mildly* easier to manage
-#define INPUT   0
-#define OUTPUT  1
-#define SET(func, pin) (##func## |= ##pin##) // set target to 1
-#define CLEAR(func, pin) (##func## &= ~##pin##) // clear target to 0
+#define INPUT           0
+#define OUTPUT          1
+#define LOW             0
+#define HIGH            1
+#define RISING_EDGE     0
+#define FALLING_EDGE    1
+#define SET(func, pin)      ##func## |= ##pin##   // Set target to 1
+#define CLEAR(func, pin)    ##func## &= ~##pin##  // Clear target to 0
 
 #define PxDIR(n) 		P##n##DIR		// Port n Direction
 #define PxOUT(n) 		P##n##OUT		// Port n Output
 #define PxREN(n) 		P##n##REN		// Port n Resistor Enable
 #define PxSEL0(n) 		P##n##SEL0		// Port n Function Select 0
 #define PxSEL1(n) 		P##n##SEL1		// Port n Function Select 1
-#define PxIES(n) 		P##n##IES		// Port n 
+#define PxIES(n) 		P##n##IES		// Port n Interrupt Edge Select
 #define PxIE(n) 		P##n##IE		// Port n Interrupt Enable
 #define PxIFG(n) 		P##n##IFG		// Port n Interrupt Flag
 #pragma endregion
@@ -34,43 +38,45 @@
 // Use properly if you want proper results. (Default is to 0)
 
 /* SET PIN I/O DIRECTION
- * Ex. usage for Dummy Pin
  * 
+ * Ex. usage for dummy pin
  * SET_PIN_DIR(DUMMY_PORT, DUMMY_PIN, INPUT)
  */
-// TODO: check the validity of this with the data sheet. Input and output might be switched
-#define SET_PIN_DIR(port, pin, dir)
-    #if dir
-        SET(PxSDIR(##port##), ##pin##)
-    #else
-        CLEAR(PxDIR(##port##), ##pin##)
-    #endif
+#define PIN_DIR(port, pin, dir)
+
+/* SET PIN OUTPUT VALUE
+ * 
+ * Ex. usage for dummy pin
+ */
+#define PIN_OUT(port, pin, value)
 
 /* SET PIN FUNCTION (SEL)
  * 
- * Ex. usage for Dummy Pin
- * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, b00)
+ * Ex. usage for dummy pin
+ * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0b00)
  * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0)
  * 
  */
-#define SET_PIN_SEL(port, pin, sel)
-    #if sel & 0x0
-        SET(PxSEL0(##port##), ##pin##)
-    #else 
-        CLEAR(PxSEL0(##port##), ##pin##)
-    #endif
-
-    #if sel & 0x1
-        SET(PxSEL1(##port##), ##pin##)
-    #else
-        CLEAR(PxSEL1(##port##), ##pin##)
-    #endif
+#define PIN_SET_SEL(port, pin, sel) \
+    if (sel & 0b01) { \
+        SET(PxSEL0(port), ##pin##); \
+    } else { \
+        CLEAR(PxSEL0(port), ##pin##); \
+    } \
+\
+    if (sel & 0b10) { \
+        SET(PxSEL1(port), ##pin##); \
+    } else { \
+        CLEAR(PxSEL1(port), ##pin##); \
+    }
 
 /* SET PIN IES
  * 
- * 
- * 
+ * Ex. usage for dummy pin
+ * SET_PIN_IES(DUMMY_PORT, DUMMY_PIN, RISING_EDGE)
  */
+#define PIN_SEL(port, pin, edge)
+
 #pragma endregion
 
 #pragma region 
