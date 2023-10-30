@@ -1,7 +1,7 @@
 /**
  * @file ports.h
  * @author William Kelso (wpkelso)
- * @version 0.1
+ * @version 0.2
  * 
  * @section DESCRIPTION
  * Definitions of pins used in MEBv2.0, as well as various preprocessor
@@ -64,6 +64,15 @@
  *
  * Ex. usage for dummy pin
  * PIN_SET_REN(DUMMY_PORT, DUMMY_PIN, ENABLE)
+ * 
+ * The table below has proper configurations for pullup and pulldown 
+ * resistors (requires them to be installed in hardware).
+ * | PxDIR | PxREN | PxOUT | I/O Config        |
+ * |-------|-------|-------|-------------------|
+ * | 0     | 0     | x     | Input             |
+ * | 0     | 1     | 0     | Input w/ pulldown |
+ * | 0     | 1     | 0     | Input w/ pullup   |
+ * | 0     | x     | x     | Output            |
  */
 #define PIN_SET_REN(port, pin, value)
 
