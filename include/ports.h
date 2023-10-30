@@ -102,7 +102,7 @@
 
 /* SET PIN 
  * 
- * 
+ * Ex. usage for dummy pin
  * PIN_SET_IFG(DUMMY_PORT, DUMMY_PIN, HIGH)
  */
 #define PIN_SET_IFG(port, pin, value)
