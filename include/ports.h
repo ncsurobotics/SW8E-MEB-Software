@@ -5,12 +5,13 @@
  * 
  * @section DESCRIPTION
  * Definitions of pins used in MEBv2.0, as well as various preprocessor
- * macros that can be used to simplify pin management
+ * macros that can be used to simplify pin management.
  */
 
 #ifndef PORTS_H
 #define PORTS_H
 
+#pragma region 
 // Macros for making pins *mildly* easier to manage
 #define INPUT   0
 #define OUTPUT  1
@@ -25,7 +26,25 @@
 #define PxIES(n) 		P##n##IES		// Port n 
 #define PxIE(n) 		P##n##IE		// Port n Interrupt Enable
 #define PxIFG(n) 		P##n##IFG		// Port n Interrupt Flag
+#pragma endregion
 
+
+#pragma region 
+// Warning: There is no invalid input detection in the following macros.
+// Use properly if you want proper results. (Default is to 0)
+
+/* SET PIN I/O DIRECTION
+ * Ex. usage for Dummy Pin
+ * 
+ * SET_PIN_DIR(DUMMY_PORT, DUMMY_PIN, INPUT)
+ */
+// TODO: check the validity of this with the data sheet. Input and output might be switched
+#define SET_PIN_DIR(port, pin, dir)
+    #if dir
+        SET(PxSDIR(##port##), ##pin##)
+    #else
+        CLEAR(PxDIR(##port##), ##pin##)
+    #endif
 
 /* SET PIN FUNCTION (SEL)
  * 
@@ -47,19 +66,14 @@
         CLEAR(PxSEL1(##port##), ##pin##)
     #endif
 
-/* SET PIN I/O DIRECTION
- * Ex. usage for Dummy Pin
+/* SET PIN IES
  * 
- * SET_PIN_DIR()
+ * 
+ * 
  */
-// TODO: check the validity of this with the data sheet. Input and output might be switched
-#define SET_PIN_DIR(port, pin, dir)
-    #if dir
-        SET(PxSDIR(##port##), ##pin##)
-    #else
-        CLEAR(PxDIR(##port##), ##pin##)
-    #endif
+#pragma endregion
 
+#pragma region 
 /*
  * ---------------
  * Pin definitions
@@ -123,5 +137,6 @@
 // P4.7 | UCB1MISO; SPI data in to MEB 
 #define SPI_MISO_PORT       4
 #define SPI_MISO_PIN        BIT7
+#pragma endregion
 
 #endif
