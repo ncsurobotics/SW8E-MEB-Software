@@ -12,33 +12,31 @@
  
  
 
-// Leak Detection (Px_x)
-PxSEL0(1) &= ~LEAK_DETECT;
-PxSEL1(1) &= ~LEAK_DETECT;
-PxDIR(1) &= ~LEAK_DETECT;
+// Leak Detection (P1.5)
+SET_PIN_SEL(LEAK_DETECT_PORT, LEAK_DETECT_PIN, 0);
  
-// LED Strip Data line (Px_x)
+// LED Strip Data line (Px.x)
  
-// System Power Enable (Px_x)
+// System Power Enable (Px.x)
  
-// Thruster arm state (Px_x)
+// Thruster arm state (Px.x)
  
-// Software Kill (Px_x)
+// Software Kill (Px.x)
  
-// SDA I2C data line (Px_x)
+// SDA I2C data line (Px.x)
  
-// SCL I2C clock line (Px_x)
+// SCL I2C clock line (Px.x)
  
-// UART0 Transmit line (Px_x)
+// UART0 Transmit line (Px.x)
 
-// UART0 Recieve line (Px_x)
+// UART0 Recieve line (Px.x)
  
-// UART Debug Transmit line (Px_x)
+// UART Debug Transmit line (Px.x)
 
-// UART Debug Recieve line (Px_x)
+// UART Debug Recieve line (Px.x)
 
-// SPI Clock line (Px_x)
+// SPI Clock line (Px.x)
 
-// SPI data out (Px_x)
+// SPI data out (Px.x)
 
-// SPI data in (Px_x)
+// SPI data in (Px.x)

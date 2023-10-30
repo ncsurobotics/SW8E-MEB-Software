@@ -16,7 +16,8 @@ int main() {
     // Main Loop
     //---------------
     
-    // This general structure is lifted directly from MB3hel's AHT10 driver (github.com/MB3hel/AHT10Driver)
+    // This general structure is lifted directly from MB3hel's AHT10 driver for the MSP430 platform (github.com/MB3hel/AHT10Driver)
+    // The idea is that we run tasks in chunks depending on how often we want to schedule them, and go into low power mode if nothing currently needs to run
     while(true) {
         if (CHECK_FLAG(TIMING_10MS)) {
             CLEAR_FLAG(TIMING_100MS);
