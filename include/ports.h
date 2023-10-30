@@ -12,13 +12,20 @@
 #define PORTS_H
 
 #pragma region 
+
 // Macros for making pins *mildly* easier to manage
 #define INPUT           0
 #define OUTPUT          1
+
 #define LOW             0
 #define HIGH            1
+
 #define RISING_EDGE     0
 #define FALLING_EDGE    1
+
+#define DISABLE         0
+#define ENABLE          1
+
 #define SET(func, pin)      ##func## |= ##pin##   // Set target to 1
 #define CLEAR(func, pin)    ##func## &= ~##pin##  // Clear target to 0
 
@@ -30,32 +37,41 @@
 #define PxIES(n) 		P##n##IES		// Port n Interrupt Edge Select
 #define PxIE(n) 		P##n##IE		// Port n Interrupt Enable
 #define PxIFG(n) 		P##n##IFG		// Port n Interrupt Flag
+
 #pragma endregion
 
 
 #pragma region 
+
 // Warning: There is no invalid input detection in the following macros.
 // Use properly if you want proper results. (Default is to 0)
 
 /* SET PIN I/O DIRECTION
  * 
  * Ex. usage for dummy pin
- * SET_PIN_DIR(DUMMY_PORT, DUMMY_PIN, INPUT)
+ * PIN_SET_DIR(DUMMY_PORT, DUMMY_PIN, INPUT)
  */
-#define PIN_DIR(port, pin, dir)
+#define PIN_SET_DIR(port, pin, dir)
 
 /* SET PIN OUTPUT VALUE
  * 
  * Ex. usage for dummy pin
+ * PIN_SET_OUT(DUMMY_PORT, DUMMY_PIN, HIGH)
  */
-#define PIN_OUT(port, pin, value)
+#define PIN_SET_OUT(port, pin, value)
+
+/* SET PIN PULLUP RESISTOR ENABLE
+ *
+ * Ex. usage for dummy pin
+ * PIN_SET_REN(DUMMY_PORT, DUMMY_PIN, ENABLE)
+ */
+#define PIN_SET_REN(port, pin, value)
 
 /* SET PIN FUNCTION (SEL)
  * 
  * Ex. usage for dummy pin
  * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0b00)
  * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0)
- * 
  */
 #define PIN_SET_SEL(port, pin, sel) \
     if (sel & 0b01) { \
@@ -63,7 +79,7 @@
     } else { \
         CLEAR(PxSEL0(port), ##pin##); \
     } \
-\
+    \
     if (sel & 0b10) { \
         SET(PxSEL1(port), ##pin##); \
     } else { \
@@ -75,11 +91,26 @@
  * Ex. usage for dummy pin
  * SET_PIN_IES(DUMMY_PORT, DUMMY_PIN, RISING_EDGE)
  */
-#define PIN_SEL(port, pin, edge)
+#define PIN_SET_IES(port, pin, edge)
+
+/* SET INTERRUPT ENABLE
+ *
+ * Ex. usage for dummy pin
+ * SET_PIN_IE(DUMMY_PORT, DUMMY_PIN, ENABLE)
+ */
+#define PIN_SET_IE(port, pin, value)
+
+/* SET PIN 
+ * 
+ * 
+ * PIN_SET_IFG(DUMMY_PORT, DUMMY_PIN, HIGH)
+ */
+#define PIN_SET_IFG(port, pin, value)
 
 #pragma endregion
 
 #pragma region 
+
 /*
  * ---------------
  * Pin definitions
@@ -143,6 +174,7 @@
 // P4.7 | UCB1MISO; SPI data in to MEB 
 #define SPI_MISO_PORT       4
 #define SPI_MISO_PIN        BIT7
+
 #pragma endregion
 
 #endif
