@@ -65,16 +65,21 @@
  * Ex. usage for dummy pin
  * PIN_SET_REN(DUMMY_PORT, DUMMY_PIN, ENABLE)
  * 
- * The table below has proper configurations for pullup and pulldown 
+ * The table below has proper configurations for pullup and pulldown resistors on PxREN
  * resistors (requires them to be installed in hardware).
  * | PxDIR | PxREN | PxOUT | I/O Config        |
  * |-------|-------|-------|-------------------|
  * | 0     | 0     | x     | Input             |
  * | 0     | 1     | 0     | Input w/ pulldown |
- * | 0     | 1     | 0     | Input w/ pullup   |
- * | 0     | x     | x     | Output            |
+ * | 0     | 1     | 1     | Input w/ pullup   |
+ * | 1     | x     | x     | Output            |
  */
-#define PIN_SET_REN(port, pin, value)
+#define PIN_SET_REN(port, pin, value) \
+    if (value & 0b1) { \
+        SET(PxREN(port), ##pin##); \
+    } else { \
+        CLEAR(PxREN(port), ##pin##); \
+    }
 
 /* SET PIN FUNCTION (SEL)
  * 
