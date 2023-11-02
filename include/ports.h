@@ -62,11 +62,11 @@
 
 /* SET PIN PULLUP RESISTOR ENABLE
  *
- * Ex. usage for dummy pin
+ * Ex. usage for @tag:usesOnlineServicesdummy pin
  * PIN_SET_REN(DUMMY_PORT, DUMMY_PIN, ENABLE)
  * 
- * The table below has proper configurations for pullup and pulldown resistors on PxREN
- * resistors (requires them to be installed in hardware).
+ * The table below has proper configurations for pullup and pulldown
+ * resistors on PxREN (requires them to be installed in hardware).
  * | PxDIR | PxREN | PxOUT | I/O Config        |
  * |-------|-------|-------|-------------------|
  * | 0     | 0     | x     | Input             |
@@ -103,9 +103,14 @@
 /* SET PIN IES
  * 
  * Ex. usage for dummy pin
- * SET_PIN_IES(DUMMY_PORT, DUMMY_PIN, RISING_EDGE)
+ * PIN_SET_IES(DUMMY_PORT, DUMMY_PIN, RISING_EDGE)
  */
-#define PIN_SET_IES(port, pin, edge)
+#define PIN_SET_IES(port, pin, edge) \
+    if (edge & LOW) { \
+        SET(PxIES(port), ##pin##); \
+    } else { \
+        CLEAR(PxIES(port), ##pin##); \
+    }
 
 /* SET INTERRUPT ENABLE
  *
