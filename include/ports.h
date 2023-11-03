@@ -51,7 +51,12 @@
  * Ex. usage for dummy pin
  * PIN_SET_DIR(DUMMY_PORT, DUMMY_PIN, INPUT)
  */
-#define PIN_SET_DIR(port, pin, dir)
+#define PIN_SET_DIR(port, pin, dir) \
+    if (dir & OUTPUT) { \
+        SET(PxDIR(port), ##pin##); \
+    } else { \
+        CLEAR(PxDIR(port), ##pin##); \
+    }
 
 /* SET PIN OUTPUT VALUE
  * 
@@ -67,6 +72,7 @@
  * 
  * The table below has proper configurations for pullup and pulldown
  * resistors on PxREN (requires them to be installed in hardware).
+ *
  * | PxDIR | PxREN | PxOUT | I/O Config        |
  * |-------|-------|-------|-------------------|
  * | 0     | 0     | x     | Input             |

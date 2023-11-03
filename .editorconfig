@@ -1,0 +1,16 @@
+# Top level config
+root = true
+
+# Unix-style line endings
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+# Indent size and style
+[*.{c, h}]
+indent_style = space
+indent_size = 4
+
+# Remove whitespace before new-line characters
+[*]
+trim_trailing_whitespace = true
