@@ -26,8 +26,8 @@
 #define DISABLE         0
 #define ENABLE          1
 
-#define SET(func, pin)      ##func## |= ##pin##   // Set target to 1
-#define CLEAR(func, pin)    ##func## &= ~##pin##  // Clear target to 0
+#define SET(func, pin)      func |= pin   // Set target to 1
+#define CLEAR(func, pin)    func &= ~pin  // Clear target to 0
 
 #define PxDIR(n) 		P##n##DIR		// Port n Direction
 #define PxOUT(n) 		P##n##OUT		// Port n Output

@@ -55,5 +55,8 @@ dkms.conf
 .idea/
 .vscode/
 
+# MSP430
+msp430/
+
 # cmake
 cmake-build-debug/
