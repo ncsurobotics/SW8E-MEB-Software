@@ -11,8 +11,6 @@
 #ifndef PORTS_H
 #define PORTS_H
 
-#pragma region
-
 // Macros for making pins *mildly* easier to manage
 #define INPUT           0
 #define OUTPUT          1
@@ -26,8 +24,8 @@
 #define DISABLE         0
 #define ENABLE          1
 
-#define SET(func, pin)      func |= pin   // Set target to 1
-#define CLEAR(func, pin)    func &= ~pin  // Clear target to 0
+#define SET(func, pin)      func |= pin;   // Set target to 1
+#define CLEAR(func, pin)    func &= ~pin;  // Clear target to 0
 
 #define PxDIR(n) 		P##n##DIR		// Port n Direction
 #define PxOUT(n) 		P##n##OUT		// Port n Output
@@ -38,10 +36,7 @@
 #define PxIE(n) 		P##n##IE		// Port n Interrupt Enable
 #define PxIFG(n) 		P##n##IFG		// Port n Interrupt Flag
 
-#pragma endregion
 
-
-#pragma region
 
 // Warning: There is no invalid input detection in the following macros.
 // Use properly if you want proper results. (Default is to 0)
@@ -53,9 +48,9 @@
  */
 #define PIN_SET_DIR(port, pin, dir) \
     if (dir & OUTPUT) { \
-        SET(PxDIR(port), ##pin##); \
+        SET(PxDIR(port), pin) \
     } else { \
-        CLEAR(PxDIR(port), ##pin##); \
+        CLEAR(PxDIR(port), pin) \
     }
 
 /* SET PIN OUTPUT VALUE
@@ -67,7 +62,7 @@
 
 /* SET PIN PULLUP RESISTOR ENABLE
  *
- * Ex. usage for @tag:usesOnlineServicesdummy pin
+ * Ex. usage for dummy pin
  * PIN_SET_REN(DUMMY_PORT, DUMMY_PIN, ENABLE)
  *
  * The table below has proper configurations for pullup and pulldown
@@ -81,10 +76,10 @@
  * | 1     | x     | x     | Output            |
  */
 #define PIN_SET_REN(port, pin, value) \
-    if (value & 0b1) { \
-        SET(PxREN(port), ##pin##); \
+    if (value & BIT1) { \
+        SET(PxREN(port), pin) \
     } else { \
-        CLEAR(PxREN(port), ##pin##); \
+        CLEAR(PxREN(port), pin) \
     }
 
 /* SET PIN FUNCTION (SEL)
@@ -94,16 +89,16 @@
  * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0)
  */
 #define PIN_SET_SEL(port, pin, sel) \
-    if (sel & 0b01) { \
-        SET(PxSEL0(port), ##pin##); \
+    if (sel & BIT0) { \
+        SET(PxSEL0(port), pin) \
     } else { \
-        CLEAR(PxSEL0(port), ##pin##); \
+        CLEAR(PxSEL0(port), pin) \
     } \
     \
-    if (sel & 0b10) { \
-        SET(PxSEL1(port), ##pin##); \
+    if (sel & BIT1) { \
+        SET(PxSEL1(port), pin) \
     } else { \
-        CLEAR(PxSEL1(port), ##pin##); \
+        CLEAR(PxSEL1(port), pin) \
     }
 
 /* SET PIN IES
@@ -113,9 +108,9 @@
  */
 #define PIN_SET_IES(port, pin, edge) \
     if (edge & LOW) { \
-        SET(PxIES(port), ##pin##); \
+        SET(PxIES(port), pin) \
     } else { \
-        CLEAR(PxIES(port), ##pin##); \
+        CLEAR(PxIES(port), pin) \
     }
 
 /* SET INTERRUPT ENABLE
@@ -132,9 +127,7 @@
  */
 #define PIN_SET_IFG(port, pin, value)
 
-#pragma endregion
 
-#pragma region
 
 /*
  * ---------------
@@ -184,7 +177,7 @@
 // P4.3 | UCA1TX; Debug UART transmit from MEB
 #define UART_DBG_TX_PORT    4
 #define UART_DBG_TX_PIN     BIT3
-// P4.2 | UCA1RX; Debug UART recive to MEB
+// P4.2 | UCA1RX; Debug UART receive to MEB
 #define UART_DBG_RX_PORT    4
 #define UART_DBG_RX_PIN     BIT2
 
@@ -199,7 +192,5 @@
 // P4.7 | UCB1MISO; SPI data in to MEB
 #define SPI_MISO_PORT       4
 #define SPI_MISO_PIN        BIT7
-
-#pragma endregion
 
 #endif
