@@ -76,7 +76,7 @@
  * | 1     | x     | x     | Output            |
  */
 #define PIN_SET_REN(port, pin, value) \
-    if (value & BIT1) { \
+    if (value & BIT0) { \
         SET(PxREN(port), pin) \
     } else { \
         CLEAR(PxREN(port), pin) \
