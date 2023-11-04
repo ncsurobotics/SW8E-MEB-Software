@@ -2,7 +2,7 @@
  * @file ports.h
  * @author William Kelso (wpkelso)
  * @version 0.2
- * 
+ *
  * @section DESCRIPTION
  * Definitions of pins used in MEBv2.0, as well as various preprocessor
  * macros that can be used to simplify pin management.
@@ -11,7 +11,7 @@
 #ifndef PORTS_H
 #define PORTS_H
 
-#pragma region 
+#pragma region
 
 // Macros for making pins *mildly* easier to manage
 #define INPUT           0
@@ -41,13 +41,13 @@
 #pragma endregion
 
 
-#pragma region 
+#pragma region
 
 // Warning: There is no invalid input detection in the following macros.
 // Use properly if you want proper results. (Default is to 0)
 
 /* SET PIN I/O DIRECTION
- * 
+ *
  * Ex. usage for dummy pin
  * PIN_SET_DIR(DUMMY_PORT, DUMMY_PIN, INPUT)
  */
@@ -59,7 +59,7 @@
     }
 
 /* SET PIN OUTPUT VALUE
- * 
+ *
  * Ex. usage for dummy pin
  * PIN_SET_OUT(DUMMY_PORT, DUMMY_PIN, HIGH)
  */
@@ -69,7 +69,7 @@
  *
  * Ex. usage for @tag:usesOnlineServicesdummy pin
  * PIN_SET_REN(DUMMY_PORT, DUMMY_PIN, ENABLE)
- * 
+ *
  * The table below has proper configurations for pullup and pulldown
  * resistors on PxREN (requires them to be installed in hardware).
  *
@@ -88,7 +88,7 @@
     }
 
 /* SET PIN FUNCTION (SEL)
- * 
+ *
  * Ex. usage for dummy pin
  * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0b00)
  * SET_PIN_SEL(DUMMY_PORT, DUMMY_PIN, 0)
@@ -107,7 +107,7 @@
     }
 
 /* SET PIN IES
- * 
+ *
  * Ex. usage for dummy pin
  * PIN_SET_IES(DUMMY_PORT, DUMMY_PIN, RISING_EDGE)
  */
@@ -125,8 +125,8 @@
  */
 #define PIN_SET_IE(port, pin, value)
 
-/* SET PIN 
- * 
+/* SET PIN
+ *
  * Ex. usage for dummy pin
  * PIN_SET_IFG(DUMMY_PORT, DUMMY_PIN, HIGH)
  */
@@ -134,7 +134,7 @@
 
 #pragma endregion
 
-#pragma region 
+#pragma region
 
 /*
  * ---------------
@@ -196,7 +196,7 @@
 // P4.6 | UCB1MOSI; SPI data out from MEB
 #define SPI_MOSI_PORT       4
 #define SPI_MOSI_PIN        BIT6
-// P4.7 | UCB1MISO; SPI data in to MEB 
+// P4.7 | UCB1MISO; SPI data in to MEB
 #define SPI_MISO_PORT       4
 #define SPI_MISO_PIN        BIT7
 
