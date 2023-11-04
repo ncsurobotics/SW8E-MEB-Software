@@ -11,6 +11,24 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+////////////////////////////////////////////////////////////////////////////////
+/// Flags from interrupt service routines
+////////////////////////////////////////////////////////////////////////////////
+
+// Can make this wider if necessary
+volatile uint8_t flags = 0;
+
+#define TIMING_10MS         BIT0        // Set every 10ms
+#define TIMING_100MS        BIT1        // Set every 100ms
+#define TIMING_500MS        BIT2        // Set every 500ms
+#define TIMING_1S           BIT3        // Set every 1s
+#define AHT10_DONE          BIT4        // AHT10 I2C done (success or fail)
+#define AHT10_FAIL          BIT5        // AHT10 I2C failed
+
+#define SET_FLAG(x)         flags |= (x)
+#define CHECK_FLAG(x)       (flags & x)
+#define CLEAR_FLAG(x)       flags &= ~(x)
+
 int main() {
     //---------------
     // Main Loop

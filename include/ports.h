@@ -4,7 +4,11 @@
  * @version 0.2
  *
  * @section DESCRIPTION
- * Definitions of pins used in MEBv2.0, as well as various preprocessor
+ * Definitions of pins used in MEBv2.0, as well as v
+#define TIMING_10MS         BIT0        // Set every 10ms
+#define TIMING_100MS        BIT1        // Set every 100ms
+#define TIMING_500MS        BIT2        // Set every 500ms
+#define TIMING_1S           BIT3        // Set every 1sarious preprocessor
  * macros that can be used to simplify pin management.
  */
 
