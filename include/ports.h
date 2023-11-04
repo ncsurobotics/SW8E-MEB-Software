@@ -193,4 +193,6 @@
 #define SPI_MISO_PORT       4
 #define SPI_MISO_PIN        BIT7
 
+void pins_setup();
+
 #endif
