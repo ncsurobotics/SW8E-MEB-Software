@@ -58,7 +58,12 @@
  * Ex. usage for dummy pin
  * PIN_SET_OUT(DUMMY_PORT, DUMMY_PIN, HIGH)
  */
-#define PIN_SET_OUT(port, pin, value)
+#define PIN_SET_OUT(port, pin, value) \
+	if (value & HIGH) { \
+		SET(PxOUT(port), pin) \
+	} else { \
+		CLEAR(PxOUT(port), pin) \
+	}
 
 /* SET PIN PULLUP RESISTOR ENABLE
  *
@@ -118,14 +123,24 @@
  * Ex. usage for dummy pin
  * SET_PIN_IE(DUMMY_PORT, DUMMY_PIN, ENABLE)
  */
-#define PIN_SET_IE(port, pin, value)
+#define PIN_SET_IE(port, pin, value) \
+	if (value & ENABLE) { \
+		SET(PxIE(port), pin) \
+	} else { \
+		CLEAR(PxIE(port), pin) \
+	}
 
 /* SET PIN
  *
  * Ex. usage for dummy pin
  * PIN_SET_IFG(DUMMY_PORT, DUMMY_PIN, HIGH)
  */
-#define PIN_SET_IFG(port, pin, value)
+#define PIN_SET_IFG(port, pin, value) \
+	if (value & HIGH) { \
+		SET(PxIFG(port), pin) \
+	} else { \
+		CLEAR(PxIFG(port), pin) \
+	}
 
 
 
