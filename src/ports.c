@@ -10,7 +10,7 @@
 #include "ports.h"
 #include "msp430.h"
 
-void pins_setup() {
+void pins_init() {
     // Leak Detection (P1.5)
     PIN_SET_SEL(LEAK_DETECT_PORT, LEAK_DETECT_PIN, 0b00)
     PIN_SET_DIR(LEAK_DETECT_PORT, LEAK_DETECT_PIN, INPUT)
