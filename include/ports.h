@@ -39,7 +39,8 @@
 
 
 // Warning: There is no invalid input detection in the following macros.
-// Use properly if you want proper results. (Default is to 0)
+// Use properly if you want proper results. (Default is to 0/Clear/Low)
+// Welcome to Macro Hell!
 
 /* SET PIN I/O DIRECTION
  *
