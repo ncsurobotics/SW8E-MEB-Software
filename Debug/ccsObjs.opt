@@ -1,8 +1,0 @@
-"./src/clock.obj"
-"./src/main.obj"
-"./src/ports.obj"
-"./src/system.obj"
-"./src/timers.obj"
-"../lnk_msp430fr2355.cmd"
--lfrwp_init.a
--llibc.a
