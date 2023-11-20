@@ -1,0 +1,49 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "fr2355",
+            "displayName": "MSP430FR2355",
+            "description": "MSP430FR2355 Target",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/fr2355",
+            "cacheVariables": {
+                "TARGET_CHIP": "fr2355",
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/msp430-gcc-toolchain.cmake"
+            },
+            "environment": {},
+            "vendor": {}
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "fr2355-debug",
+            "displayName": "Debug",
+            "configurePreset": "fr2355",
+            "configuration": "Debug"
+        },
+        {
+            "name": "fr2355-release",
+            "displayName": "Release",
+            "configurePreset": "fr2355",
+            "configuration": "Release"
+        },
+        {
+            "name": "fr2355-minsizerel",
+            "displayName": "MinSizeRel",
+            "configurePreset": "fr2355",
+            "configuration": "MinSizeRel"
+        },
+        {
+            "name": "fr2355-relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "configurePreset": "fr2355",
+            "configuration": "RelWithDebInfo"
+        }
+    ]
+}
