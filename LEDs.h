@@ -31,7 +31,7 @@
 #define SOFTWARE_ARM_LED (2)
 #define SOFTWARE_ARM_LED_ALT (5)
 #define USER_PROGRAMMABLE_LED (3)
-#define USER_PROGRAMMABLE_LED (4)
+#define USER_PROGRAMMABLE_LED_ALT (4)
 
 // LED Strip class that contains the LED value arrays as parameters and functions for writing and updating the LED Strip
 class LED_Strip{

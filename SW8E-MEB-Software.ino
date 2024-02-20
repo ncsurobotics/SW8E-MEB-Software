@@ -332,13 +332,33 @@ void task_receive_pc(){
 
   // Handle message. Use MSG_STARTS_WITH and MSG_EQUALS for comparisons
   const uint8_t CMD_MSB_PREFIX[] = {'M', 'S', 'B'};
+  const uint8_t CMD_LED_PREFIX[] = {'L', 'E', 'D'};
 
   if(data_startswith(msg, msg_len, CMD_MSB_PREFIX, sizeof(CMD_MSB_PREFIX))){
     // 'M', 'S', 'B', [data]
     // [data] is arbitrary sized data to be sent to mech systems board
     msb.transfer(&msg[3], msg_len - 3, NULL, 0);
     comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
-  }else{
+  }
+  else if(data_startswith(msg, msg_len, CMD_LED_PREFIX, sizeof(CMD_LED_PREFIX))){
+    // 'L', 'E', 'D', [index], [RGB]
+    // [index] is 0 or 1. 0 means LEDs 2/5, 1 means LEDs 3/4
+    // [RGB] is the full RGB string
+    uint32_t rgb_Val = 0;
+    rgb_Val = rgb_Val | (msg[4] << 16);
+    rgb_Val = rgb_Val | (msg[5] << 8);
+    rgb_Val = rgb_Val | msg[6];
+    if(msg[3] == '2'){
+      ledStrip.set_One(SOFTWARE_ARM_LED, LED_msg);
+      ledStrip.set_One(SOFTWARE_ARM_LED_ALT, LED_msg);
+    }
+    else if(msg[3] == '3'){
+      ledStrip.set_One(USER_PROGRAMMABLE_LED, LED_msg);
+      ledStrip.set_One(USER_PROGRAMMABLE_LED_ALT, LED_msg);
+    }
+    comm.acknowledge(msg_id, ACK_ERR_NONE, NULL, 0);
+  }
+  else{
     comm.acknowledge(msg_id, ACK_ERR_UNKNOWN_MSG, NULL, 0);
   }
 }
