@@ -2,11 +2,11 @@
  * @file leds.h
  * @author William Kelso (wpkelso)
  * @version 0.1
- * 
+ *
  * @section DESCRIPTION
  *
  */
- 
+
 #include <stdint.h>
 
 #ifndef LEDS_H
@@ -16,26 +16,31 @@
 // COLORS
 //---------------
 /* Colors are defined in the format (0xRRGGBB) */
-#define BLACK       (0x000000) // Turns the LED OFF
-#define WHITE       (0xFFFFFF)
-#define RED         (0xFF0000)
-#define YELLOW      (0xF08000)
-#define GREEN       (0x00FF00)
-#define BLUE        (0x0000FF)
-#define MAGENTA     (0xFF005E)
+
+typedef enum {
+    Black   = 0x000000, // turns LED off
+    White   = 0xFFFFFF,
+    Red     = 0xFF0000,
+    Yellow  = 0xF08000,
+    Green   = 0x00FF00,
+    Blue    = 0x0000FF,
+    Magenta = 0xFF005E
+} color_generic_t;
 
 //---------------
 // MAPPINGS
 //---------------
-#define PH0 (0)
-#define PH1 (1)
-#define PH2 (2)
-#define PH3 (3)
-#define PH4 (4)
-#define PH5 (5)
-#define PH6 (6)
-#define PH7 (7)
-#define PH8 (8)
+/* Assignments here correspond with places in the LED arrays */
+enum led_assignment {
+    Sys_On_F = 0,
+    Sys_On_B = 7,
+    Arm_F = 1,
+    Arm_B = 6,
+    Programmable_0_F = 2,
+    Programmable_0_B = 5,
+    Programmable_1_F = 3,
+    Programmable_1_B = 4
+};
 
 //---------------
 // FUNCTIONS
@@ -43,7 +48,7 @@
 
 /*
  * Configures the RGB values for a specified LED
- * @param led 
+ * @param led
  * @param color
  */
 void leds_set_single(int led, uint32_t color);
