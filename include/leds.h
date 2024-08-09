@@ -1,22 +1,11 @@
-/**
- * @file leds.h
- * @author William Kelso (wpkelso)
- * @version 0.1
- *
- * @section DESCRIPTION
- *
- */
-
 #include <stdint.h>
 
 #ifndef LEDS_H
 #define LEDS_H
 
-//---------------
-// COLORS
-//---------------
-/* Colors are defined in the format (0xRRGGBB) */
+#define NUM_LED (8)
 
+/* Colors are defined in the format (0xRRGGBB) */
 typedef enum {
     Black   = 0x000000, // turns LED off
     White   = 0xFFFFFF,
@@ -27,9 +16,6 @@ typedef enum {
     Magenta = 0xFF005E
 } color_generic_t;
 
-//---------------
-// MAPPINGS
-//---------------
 /* Assignments here correspond with places in the LED arrays */
 enum led_assignment {
     Sys_On_F = 0,
@@ -41,6 +27,12 @@ enum led_assignment {
     Programmable_1_F = 3,
     Programmable_1_B = 4
 };
+
+typedef struct {
+    uint8_t red[NUM_LED];
+    uint8_t green[NUM_LED];
+    uint8_t blue[NUM_LED];
+} led_bar_t;
 
 //---------------
 // FUNCTIONS
